@@ -1,6 +1,6 @@
 from send import *
 from recv import *
-from ...ev3dev_pymotor import *
+from resources import *
 
 class udp_cli(udp_send, udp_recv):
     # chat log list
