@@ -1,15 +1,7 @@
 import socket
 import SocketServer
 
-from resources import *
-
-### Motor configuration ###
-motors = {}
-motors['left'] = ev3dev_pymotor('outA')
-motors['right'] = ev3dev_pymotor('outB')
-
-motors['left'].set_rps(0.5)
-motors['right'].set_rps(0.5)
+from translate import *
 
 ### Communication with client ###
 # Allows reusing address
