@@ -3,8 +3,8 @@ from recv import *
 from resources import *
 
 class udp_cli(udp_send, udp_recv):
-    # chat log list
-    chat_logs = []
+    # Dictionary for motors
+    motors = {}
     
     # Initializes udp send and recv
     def __init__(self, MULTICAST_USERNAME, MULTICAST_ADDY, MULTICAST_PORT):
@@ -15,28 +15,31 @@ class udp_cli(udp_send, udp_recv):
         # Is application running
         self.__running = True
         
+        # Initialize your motors here
+        self.motors['left'] = ev3dev_pymotor('outA')
+        self.motors['right'] = ev3dev_pymotor('outB')
+        
+        self.motors['left'].set_rps(0.5)
+        self.motors['right'].set_rps(0.5)
+        
     
     # updates chat screen
     def update_chat(self):
         while self.__running:
             # Gets and appends data from multicast
-            _data = udp_recv.get_recv_data(self)       
+            _data = udp_recv.get_recv_data(self)                   
             
-            # if data is none, resend handshake cause that means we just received a handshake 
-            # from a new user
-            if _data is not None:
-                self.chat_logs.append(_data)
+            if 'run_forever' in data:
+                self.motors['left'].run_forever()
+                self.motors['right'].run_forever()
                 
-                # Clears the screen
-                # os.system('clear')
-                
-                # Prints everything in the log
-                for chat_log in self.chat_logs:
-                    print chat_log
-                    # Moves motors according to command
-                    
-
-        
+            if 'stop' in data:
+                self.motors['left'].stop()
+                self.motors['right'].stop()
+            
+            print _data
+            
+            # Moves motors according to command                            
 
 # Start's cli main loop and multi-threads additional functions
 def loop_cli(cli):    
