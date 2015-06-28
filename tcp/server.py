@@ -1,6 +1,17 @@
 import socket
 import SocketServer
 
+from resources import *
+
+### Motor configuration ###
+motors = {}
+motors['left'] = ev3dev_pymotor('outA')
+motors['right'] = ev3dev_pymotor('outB')
+
+motors['left'].set_rps(0.5)
+motors['right'].set_rps(0.5)
+
+### Communication with client ###
 # Allows reusing address
 SocketServer.ThreadingTCPServer.allow_reuse_address = True
 
@@ -22,8 +33,16 @@ while SERVER_RUNNING:
     if '/quit' in data:
         SERVER_RUNNING = False
 
-    print data
+    #print data
 
     # Add moving robocup arm here
+    elif 'run_forever' in data:
+        motors['left'].run_forever()
+        motors['right'].run_forever()
 
+    elif 'stop' in data:
+        motors['left'].stop()
+        motors['right'].stop()
+
+# Close connection
 conn.close()
