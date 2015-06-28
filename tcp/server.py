@@ -28,13 +28,8 @@ while SERVER_RUNNING:
     #print data
 
     # Add moving robocup arm here
-    elif 'run_forever' in data:
-        motors['left'].run_forever()
-        motors['right'].run_forever()
-
-    elif 'stop' in data:
-        motors['left'].stop()
-        motors['right'].stop()
+    else:
+        translate(data)
 
 # Close connection
 conn.close()
