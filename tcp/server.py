@@ -5,7 +5,7 @@ import SocketServer
 SocketServer.ThreadingTCPServer.allow_reuse_address = True
 
 SERVER_RUNNING = True
-TCP_IP = '127.0.0.1'
+TCP_IP = ''
 TCP_PORT = 5005
 BUFFER_SIZE = 32  # For fast response
 
