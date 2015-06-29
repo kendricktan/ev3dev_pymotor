@@ -17,6 +17,9 @@ s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 
 conn, addr = s.accept()
+
+print 'Connection established with ' + str(addr)
+
 while SERVER_RUNNING:
     data = conn.recv(BUFFER_SIZE)
     while not data:
@@ -25,11 +28,11 @@ while SERVER_RUNNING:
     if '/quit' in data:
         SERVER_RUNNING = False
 
-    #print data
-
     # Add moving robocup arm here
     else:
         translate(data)
+
+    #print data
 
 # Close connection
 conn.close()

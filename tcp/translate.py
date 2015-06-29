@@ -24,7 +24,7 @@ def translate(raw_str):
         elif 'change_rps' in _str[0]:
             args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
             for motor in motors:
-                motors[motor].set_rps(float(args))
+                motors[motor].change_rps(float(args))
 
     elif len(_str) > 1:
 
