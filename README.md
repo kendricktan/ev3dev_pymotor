@@ -5,7 +5,8 @@ Made for the Jessie release of ev3dev (20 May 2015)
 
 **By default the script checks for motors plugged into ports A and B**
 
-## Testing motors
+## Testing motor on ev3dev
+**Make sure one motor is plugged into port A**
 
 ```python
 import time
@@ -24,8 +25,16 @@ motor.stop()
 Step 1.
 Execute setup_server.py on the ev3
 
+```python
+python setup_server.py
+```
+
 Step 2.
 Execute setup_client.py [ip address] on desired device to communicate with ev3
+
+```python
+python setup_client.py xxx.xxx.x.xx # where xxx.xxx.x.xx is the ip address of the ev3
+```
 
 Step 3.
 Run the list of commands on the desired device:
