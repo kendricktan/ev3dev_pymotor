@@ -1,20 +1,22 @@
 import socket, sys
 
-if len(sys.argv) > 1:
-    if sys.argv[1] == '-h' or sys.argv[1] == '--help':
-        print 'Usage: python client.py [target ip address]'
-        sys.exit()
+class client_tcp:
+    MSG = ''
 
-MSG = ''
-TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else '127.0.0.1'
-TCP_PORT = 5005
-BUFFER_SIZE = 32 # For fast response
+    def __init__(self, TCP_IP, TCP_PORT):
+        # Binds and establishes a connection to the
+        # specified ip address and port
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((TCP_IP, TCP_PORT))
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
+    def client_loop(self):
+        # Keeps sending commands to the server until
+        # '/quit', in which both server and client terminates
+        # the established connection
+        while '/quit' not in self.MSG:
+            self.MSG = raw_input()
+            self.s.send(self.MSG)
 
-while '/quit' not in MSG:
-    MSG = raw_input()
-    s.send(MSG)
-
-s.close()
+    def __del__(self):
+        # Closes connection
+        self.s.close()

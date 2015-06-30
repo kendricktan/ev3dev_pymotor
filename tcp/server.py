@@ -1,38 +1,44 @@
-import socket
-import SocketServer
+import socket, SocketServer
 
 from translate import *
 
-### Communication with client ###
-# Allows reusing address
-SocketServer.ThreadingTCPServer.allow_reuse_address = True
+class server_tcp:
+    SERVER_RUNNING = True
+    TCP_IP = ''
+    TCP_PORT = 5005
 
-SERVER_RUNNING = True
-TCP_IP = ''
-TCP_PORT = 5005
-BUFFER_SIZE = 32  # For fast response
+    # Small buffer size for fast response
+    BUFFER_SIZE = 32
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((TCP_IP, TCP_PORT))
-s.listen(1)
+    def __init__(self):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.bind((self.TCP_IP, self.TCP_PORT))
+        self.s.listen(1)
 
-conn, addr = s.accept()
+        self.conn, self.addr = self.s.accept()
 
-print 'Connection established with ' + str(addr)
+        # Allows reusing address
+        SocketServer.ThreadingTCPServer.allow_reuse_address = True
 
-while SERVER_RUNNING:
-    data = conn.recv(BUFFER_SIZE)
-    while not data:
-        data = conn.recv(BUFFER_SIZE)
+        print 'Connection established with ' + str(self.addr)
 
-    if '/quit' in data:
-        SERVER_RUNNING = False
+    def server_loop(self):
+        while self.SERVER_RUNNING:
 
-    # Add moving robocup arm here
-    else:
-        translate(data)
+            self.data = self.conn.recv(self.BUFFER_SIZE)
 
-    #print data
+            while not self.data:
+                self.data = self.conn.recv(self.BUFFER_SIZE)
 
-# Close connection
-conn.close()
+            if '/quit' in self.data:
+                print 'Received terminating signal... closing server now'
+                self.SERVER_RUNNING = False
+
+            # Add moving robocup arm here
+            else:
+                translate(self.data)
+                print self.data
+
+    def __del__(self):
+        # Close connection
+        self.conn.close()
