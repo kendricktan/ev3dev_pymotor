@@ -64,8 +64,12 @@ class ev3dev_pymotor:
         with open(self.motor+'/polarity', 'r+b') as f:
             if 'normal' in f.read():
                 f.write('inversed')
+
             else:
                 f.write('normal')
+
+            self.run_forever()
+
 
     def debug(self):
         print self.motor
