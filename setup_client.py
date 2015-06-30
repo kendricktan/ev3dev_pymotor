@@ -10,4 +10,4 @@ if len(sys.argv) > 1:
 TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
 
 client = client_tcp(TCP_IP)
-client.client_loop()
+client.client_loop_input()
