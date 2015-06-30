@@ -48,3 +48,11 @@ left run_forever # (runs the left motor forever)
 right change_rps(1.0) # (changes the right motor's rotation per second to '1' and runs it)
 left change_rps(0.5) # (changes the left motor's rotation per second to '0.5' and runs it)
 ```
+
+# List of available commands
+```python
+run_forever # Runs motor forever
+stop # stops motor
+change_rps(x) # Changes motor rotation per second to 'x' AND runs it
+set_rps(x) # Sets motor rotation per second to 'x' but DOESN'T run it
+```
