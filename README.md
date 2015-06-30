@@ -51,6 +51,8 @@ left change_rps(0.5) # (changes the left motor's rotation per second to '0.5' an
 
 # List of available commands
 ```python
+/quit # terminates connection on both end
+
 run_forever # Runs motor forever
 stop # stops motor
 change_rps(x) # Changes motor rotation per second to 'x' AND runs it
