@@ -35,23 +35,23 @@ while key != ord('q'):
 
     if key == curses.KEY_UP:
         stdscr.addstr(2, 20, 'Up')
-        client.set_msg('run_forever')
+        client.set_msg('change_rps(1.25)')
 
     elif key == curses.KEY_DOWN:
         stdscr.addstr(3, 20, 'Down')
-        client.set_msg('change_rps(-0.75)')
+        client.set_msg('change_rps(-1.25)')
 
     elif key == curses.KEY_LEFT:
         stdscr.addstr(4, 20, 'Left')
-        client.set_msg('left change_rps(0.75)')
+        client.set_msg('left change_rps(1.25)')
         time.sleep(0.03)
-        client.set_msg('right change_rps(-0.75)')
+        client.set_msg('right change_rps(-1.25)')
 
     elif key == curses.KEY_RIGHT:
         stdscr.addstr(5, 20, 'Right')
-        client.set_msg('left change_rps(-0.75)')
+        client.set_msg('left change_rps(-1.25)')
         time.sleep(0.03)
-        client.set_msg('right change_rps(0.75)')
+        client.set_msg('right change_rps(1.25)')
 
     elif key == ord('t'):
         stdscr.addstr(6, 20, 'Toggle')
@@ -61,4 +61,5 @@ while key != ord('q'):
         stdscr.addstr(7, 20, 'Stop')
         client.set_msg('stop')
 
+client.set_msg('/quit')
 curses.endwin()
