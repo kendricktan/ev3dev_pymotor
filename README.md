@@ -57,4 +57,5 @@ run_forever # Runs motor forever
 stop # stops motor
 change_rps(x) # Changes motor rotation per second to 'x' AND runs it
 set_rps(x) # Sets motor rotation per second to 'x' but DOESN'T run it
+toggle # Toggles motors direction
 ```

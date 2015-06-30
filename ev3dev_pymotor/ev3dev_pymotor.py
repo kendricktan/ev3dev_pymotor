@@ -59,5 +59,13 @@ class ev3dev_pymotor:
         self.set_rps(rps)
         self.run_forever()
 
+    # Toggles motor polarity and therefore direction
+    def toggle(self):
+        with open(self.motor+'/polarity', 'r+b') as f:
+            if 'normal' in f.read():
+                f.write('inversed')
+            else:
+                f.write('normal')
+
     def debug(self):
         print self.motor
