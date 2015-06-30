@@ -2,6 +2,7 @@ from ev3dev_pymotor.ev3dev_pymotor import *
 from tcp.client import *
 import curses
 import time
+import thread
 
 # Initalizes client
 # Checks for usage help
@@ -13,8 +14,9 @@ if len(sys.argv) > 1:
 TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
 
 client = client_tcp(TCP_IP)
-client.client_loop_set()
 
+# Need to multi-thread
+thread.start_new_thread(client.client_loop_set, ())
 
 # Initializes curses
 stdscr = curses.initscr()
@@ -54,5 +56,9 @@ while key != ord('q'):
     elif key == ord('t'):
         stdscr.addstr(6, 20, 'Toggle')
         client.set_msg('toggle')
+
+    elif key == ord('s'):
+        stdscr.addstr(7, 20, 'Stop')
+        client.set_msg('stop')
 
 curses.endwin()
