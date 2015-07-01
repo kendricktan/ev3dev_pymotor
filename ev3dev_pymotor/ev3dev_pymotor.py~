@@ -15,8 +15,7 @@ class ev3dev_pymotor:
     # Destructor
     def __del__(self):
         self.stop()
-        
-    # Initializes motor settings
+
     def init_settings(self):
         # Initializes the motor numbers via the output port
         for f in glob.glob('/sys/class/tacho-motor/motor*'):
@@ -36,8 +35,6 @@ class ev3dev_pymotor:
         with open(self.motor+'/stop_command', 'w') as f:
             f.write('brake')
 
-    # Setters
-    
     # Set rotations per second
     # 360 tacho count = 1 revolution
     def set_rps(self, rps):
@@ -73,13 +70,6 @@ class ev3dev_pymotor:
 
             self.run_forever()
 
-    
-    # Getters
-    
-    # Gets current rotation per second
-    def get_rps(self):
-        with open(self.motor+'/speed_sp', 'r+b') as f:
-            return f.read()            
-    
+
     def debug(self):
         print self.motor
