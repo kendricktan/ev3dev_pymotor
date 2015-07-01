@@ -152,12 +152,19 @@ while True:
     R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
     L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
-    client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
-    print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+    # If it detects line(s)
+    if len(contour_coordinates_priority) >= 3:
+        client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
+        print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
 
-    client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
-    print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
+        client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
+        print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
 
+    # Run forever until redetects the lines
+    else:
+
+        client.send('run_forever')
+        print 'run_forever'
 
     # Overflow protection
     if counter >= sys.maxint - 100000:
