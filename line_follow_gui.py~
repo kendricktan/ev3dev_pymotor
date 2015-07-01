@@ -1,16 +1,16 @@
 #!/usr/bin/python -tt
-import os, sys
-
-# Add cv2 library path
-sys.path.append('/usr/local/lib/python2.7/site-packages')
-# Loads the module for pi camera
-os.system('sudo modprobe bcm2835-v4l2')
-
+import os
+import sys
 import math
 import socket
+
+# Reloads libraries
+sys.path.append('/usr/local/lib/python2.7/site-packages')
+
 import cv2
 import time
 import numpy as np
+
 from settings import *
 
 # Initalizes tcp connection
@@ -27,14 +27,15 @@ client.connect((TCP_IP, 5005))
 
 print 'Successfully connected to ' + TCP_IP +  '...'
 
+# Loads the module for pi camera
+os.system('sudo modprobe bcm2835-v4l2')
+
 # Get pi camera stream
 cap = cv2.VideoCapture(0)
 
 # Set the resolution of the stream
 cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
 cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-
-print 'Started webcam...'
 
 # Counter to prevent overflow
 counter = 0
@@ -47,7 +48,7 @@ while True:
     ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
     ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
     ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-
+    
     # Converts ROI into Grayscale
     im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
     im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
@@ -97,6 +98,7 @@ while True:
 
             # Get dictionary keys for moments
             moments = cv2.moments (i)
+            cv2.putText(frame,'Area ' + str(contour_no+1) + " :" + str(area),(10,25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
 
             # We only want to get an area of > the threshold to prevent not usable contours
             if area>AREA_THRESH:
@@ -106,8 +108,14 @@ while True:
                         cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
 
+                        # Draw inner circle
+                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
+
+                        # Draw outer circle
+                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
+
                         # Store our centroid coordinates
-                        contour_coordinates.append((cx, cy+80+(ROI_DIF*contour_no)))
+                        contour_coordinates.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
 
                         # Find contours which are closest to the middle (so PID can be performed)
                         if len(contour_coordinates_priority) >= (contour_no+1):
@@ -115,7 +123,7 @@ while True:
                                 contour_coordinates_priority[contour_no] = (cx, cy)
 
                         else:
-                            contour_coordinates_priority.append((cx, cy+80+(ROI_DIF*contour_no)))
+                            contour_coordinates_priority.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
 
         # Variable to notify us which contour we're on (contours, contours2, or contours3)
     	contour_no += 1
@@ -138,30 +146,37 @@ while True:
             I_VAL = I_MIN
 
         PID_VAL = P_VAL + D_VAL + I_VAL
-
-        # Strength of each PID is determined by its placing (Furthest = less, nearest = more)
         PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
 
+        cv2.putText(frame, str(i) + ' PID: ' + str(PID_VAL), (CAMERA_WIDTH/2,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
         i = i + 1
 
-
-    # Sends signal to ev3
     R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
     L_MOTOR_RPS = MOTOR_RPS-PID_TOTAL
 
     R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
     L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
-    client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
-    print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+    cv2.putText(frame,  'PID_TOTAL: ' + str(PID_TOTAL), (CAMERA_WIDTH/4,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
 
-    client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
-    print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
-
+    #print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+    #print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
 
     # Overflow protection
     if counter >= sys.maxint - 100000:
         counter = 0
+
+    # Display GUI for captured frame
+    if frame is not None:
+        cv2.imshow('pi camera', frame)
+
+    # Debug
+    if cv2.waitKey(1) & 0xFF == ord('d'):
+        print contour_coordinates
+
+    # Wait for key press
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
 # When everything done, release the capture
 cap.release()
