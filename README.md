@@ -5,6 +5,7 @@ Made for the Jessie release of ev3dev (20 May 2015)
 
 **By default the script checks for motors plugged into ports A and B**
 
+# Usage
 ## Testing motor on ev3dev
 **Make sure one motor is plugged into port A**
 
