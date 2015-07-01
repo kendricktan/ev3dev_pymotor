@@ -139,8 +139,9 @@ while True:
 
         PID_VAL = P_VAL + D_VAL + I_VAL
 
-        # Strength of each PID is determined by its placing (Furthest = less, nearest = more)
+        # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
         PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
+        # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
 
         i = i + 1
 
