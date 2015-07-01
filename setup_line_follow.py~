@@ -24,10 +24,10 @@ if len(sys.argv) > 1:
 
 TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
 
-#client = client_tcp(TCP_IP)
+client = client_tcp(TCP_IP)
 
 # Need to multi-thread
-#thread.start_new_thread(client.client_loop_set, ())
+thread.start_new_thread(client.client_loop_set, ())
 
 # Loads the module for pi camera
 os.system('sudo modprobe bcm2835-v4l2')
@@ -50,7 +50,8 @@ I_MIN = 0
 PID_TOTAL = 0
 
 ERROR = 0
-MOTOR_RPS = 1 # rotations per scond
+MOTOR_RPS = 0.33 # rotations per scond
+# If line is on the right = negative value
 
 # COLORS ARE IN BGR
 RED_COLOR = (43, 57, 192)
@@ -63,7 +64,7 @@ CAMERA_WIDTH = 320
 CAMERA_HEIGHT = 240
 MIDDLE = CAMERA_WIDTH/2
 
-THRESH = 55
+THRESH = 100 # Change threshold to high if can't detect line; Change to lower if detects too many
 AREA_THRESH = 200
 
 ROI_DIF = 20
@@ -196,8 +197,13 @@ while True:
         #cv2.putText(frame, str(i) + ' PID: ' + str(PID_VAL), (CAMERA_WIDTH/2,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
         i = i + 1
         
-    cv2.putText(frame, 'PID: ' + str(PID_TOTAL), (CAMERA_WIDTH)/2, 160, cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR, 2)
+    cv2.putText(frame, 'PID: ' + str(PID_TOTAL), ((CAMERA_WIDTH)/2, 160), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR, 2)
 
+    # Sends signal to ev3
+    client.set_msg('right change_rps(' + str(MOTOR_RPS-PID_TOTAL) + ')')
+    time.sleep(0.03)
+    client.set_msg('left change_rps(' + str(MOTOR_RPS+PID_TOTAL) + ')')
+    
     # Overflow protection
     if counter >= sys.maxint - 100000:
         counter = 0

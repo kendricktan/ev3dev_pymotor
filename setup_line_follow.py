@@ -1,8 +1,8 @@
 #!/usr/bin/python -tt
-
 import os
 import sys
 import math
+import socket
 
 # Reloads libraries
 sys.path.append('/usr/local/lib/python2.7/site-packages')
@@ -11,23 +11,20 @@ import cv2
 import time
 import numpy as np
 
-# Load tcp connection
-from tcp.client import *
-import thread
+# Initalizes tcp connection
 
-# Initalizes client
 # Checks for usage help
 if len(sys.argv) > 1:
     if sys.argv[1] == '-h' or sys.argv[1] == '--help':
         print 'Usage: python setup_client.py [server ip]'
         sys.exit()
 
+TCP_PORT = 5005
 TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect((TCP_IP, 5005))
 
-#client = client_tcp(TCP_IP)
-
-# Need to multi-thread
-#thread.start_new_thread(client.client_loop_set, ())
+print 'Successfully connected to ' + TCP_IP +  '...'
 
 # Loads the module for pi camera
 os.system('sudo modprobe bcm2835-v4l2')
@@ -50,7 +47,10 @@ I_MIN = 0
 PID_TOTAL = 0
 
 ERROR = 0
-MOTOR_RPS = 1 # rotations per scond
+MOTOR_RPS = 0.2 # rotations per scond
+MOTOR_RPS_MIN = 0
+
+# If line is on the right = negative value
 
 # COLORS ARE IN BGR
 RED_COLOR = (43, 57, 192)
@@ -63,7 +63,7 @@ CAMERA_WIDTH = 320
 CAMERA_HEIGHT = 240
 MIDDLE = CAMERA_WIDTH/2
 
-THRESH = 55
+THRESH = 100 # Change threshold to high if can't detect line; Change to lower if detects too many
 AREA_THRESH = 200
 
 ROI_DIF = 20
@@ -79,6 +79,8 @@ cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
 # Counter for fps
 counter = 0
+
+print 'Starting line detection...'
 
 while True:
     # Gets frame
@@ -138,7 +140,7 @@ while True:
 
             # Get dictionary keys for moments
             moments = cv2.moments (i)
-            cv2.putText(frame,'Area ' + str(contour_no+1) + " :" + str(area),(10,25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
+            #cv2.putText(frame,'Area ' + str(contour_no+1) + " :" + str(area),(10,25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
 
             # We only want to get an area of > the threshold to prevent not usable contours
             if area>AREA_THRESH: 
@@ -149,10 +151,10 @@ while True:
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
 
                         # Draw inner circle
-                        cv2.circle(frame,(cx,cy+80+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
+                        #cv2.circle(frame,(cx,cy+80+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
 
                         # Draw outer circle
-                        cv2.circle(frame,(cx,cy+80+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
+                        #cv2.circle(frame,(cx,cy+80+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
 
                         # Draw rectangle
                         #x,y,w,h = cv2.boundingRect(i)
@@ -196,8 +198,22 @@ while True:
         #cv2.putText(frame, str(i) + ' PID: ' + str(PID_VAL), (CAMERA_WIDTH/2,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
         i = i + 1
         
-    cv2.putText(frame, 'PID: ' + str(PID_TOTAL), ((CAMERA_WIDTH)/2, 160), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR, 2)
+    #cv2.putText(frame, 'PID: ' + str(PID_TOTAL), ((CAMERA_WIDTH)/2, 160), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR, 2)
 
+    # Sends signal to ev3
+    R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
+    L_MOTOR_RPS = MOTOR_RPS-PID_TOTAL
+
+    R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
+    L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
+    
+    client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
+    print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+
+    client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
+    print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
+
+    
     # Overflow protection
     if counter >= sys.maxint - 100000:
         counter = 0
@@ -208,16 +224,16 @@ while True:
         #cv2.line(frame, (contour_coordinates[1]), (contour_coordinates[2]), RED_COLOR, 2)q
 
     # Display GUI for captured frame
-    if frame is not None:
-        cv2.imshow('pi camera', frame)        
+    #if frame is not None:
+        #cv2.imshow('pi camera', frame)        
 
     # Debug
-    if cv2.waitKey(1) & 0xFF == ord('d'):
-        print contour_coordinates
+    #if cv2.waitKey(1) & 0xFF == ord('d'):
+        #print contour_coordinates
 
     # Wait for key press
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #break
 
 # When everything done, release the capture
 cap.release()
