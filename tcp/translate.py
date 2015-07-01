@@ -9,42 +9,72 @@ def translate(raw_str):
     # in list
     if len(_str) <= 1:
         if 'run_forever' in _str[0]:
-            for motor in motors:
-                motors[motor].run_forever()
+    	    try:
+                for motor in motors:
+                    motors[motor].run_forever()
+            except:
+                pass
 
         elif 'stop' in _str[0]:
-            for motor in motors:
-                motors[motor].stop()
+            try:
+                for motor in motors:
+                    motors[motor].stop()
+            except:
+                pass
 
         elif 'toggle' in _str[0]:
-            for motor in motors:
-                motors[motor].toggle()
+            try:
+                for motor in motors:
+                    motors[motor].toggle()
+            except:
+                pass
 
         elif 'set_rps' in _str[0]:
-            args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
-            for motor in motors:
-                motors[motor].set_rps(float(args))
+            try:
+                args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
+                for motor in motors:
+                    motors[motor].set_rps(float(args))
+            except:
+                pass
 
         elif 'change_rps' in _str[0]:
-            args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
-            for motor in motors:
-                motors[motor].change_rps(float(args))
+            try:
+                args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
+                for motor in motors:
+                    motors[motor].change_rps(float(args))
+            except:
+                pass
 
     elif len(_str) > 1:
 
         if 'run_forever' in _str[1]:
-            motors[_str[0]].run_forever()
+            try:
+                motors[_str[0]].run_forever()
+            except:
+                pass
 
         elif 'stop' in _str[1]:
-            motors[_str[0]].stop()
+            try:
+                motors[_str[0]].stop()
+            except:
+                pass
 
         elif 'toggle' in _str[1]:
-            motors[_str[0]].toggle()
+            try:
+                motors[_str[0]].toggle()
+            except:
+                pass
 
         elif 'set_rps' in _str[1]:
-            args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
-            motors[_str[0]].set_rps(float(args))
+            try:
+                args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
+                motors[_str[0]].set_rps(float(args))
+            except:
+                pass
 
         elif 'change_rps' in _str[1]:
-            args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
-            motors[_str[0]].change_rps(float(args))
+            try:
+                args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
+                motors[_str[0]].change_rps(float(args))
+            except:
+                pass
