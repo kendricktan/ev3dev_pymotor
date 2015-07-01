@@ -1,10 +1,10 @@
 # PID
-PID_MULTI_THRES = 0.25 # Determines the weight of each PID value
+PID_MULTI_THRES = 0.275 # Determines the weight of each PID value
 
 
 KP = 0.0127
 KI = 0.005
-KD = 0.0095
+KD = 0.01
 DERIVATOR = 0
 
 P_VAL = 0
@@ -17,7 +17,7 @@ I_MIN = 0
 PID_TOTAL = 0
 
 ERROR = 0
-MOTOR_RPS = 0.3 # rotations per scond
+MOTOR_RPS = 0.75 # rotations per scond
 MOTOR_RPS_MIN = -2.0
 
 # If line is on the right = negative value
