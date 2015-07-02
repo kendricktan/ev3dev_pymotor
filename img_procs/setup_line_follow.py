@@ -130,7 +130,7 @@ while True:
         D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
         DERIVATOR = ERROR
 
-        #I_VAL = I_VAL + ERROR
+        I_VAL = I_VAL + ERROR
 
         if I_VAL > I_MAX:
             I_VAL = I_MAX

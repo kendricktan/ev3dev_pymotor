@@ -17,7 +17,7 @@ I_MIN = 0
 PID_TOTAL = 0
 
 ERROR = 0
-MOTOR_RPS = 0.5 # rotations per scond
+MOTOR_RPS = 0.75 # rotations per scond
 MOTOR_RPS_MIN = -2.0
 
 # If line is on the right = negative value
