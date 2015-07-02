@@ -4,7 +4,7 @@ PID_MULTI_THRES = 0.275 # Determines the weight of each PID value
 
 KP = 0.0185
 KI = 0.0075
-KD = 0.01
+KD = 0.011
 DERIVATOR = 0
 
 P_VAL = 0
