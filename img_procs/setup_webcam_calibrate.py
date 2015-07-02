@@ -51,7 +51,7 @@ while True:
     ret, im_ROI2 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     cv2.bitwise_not(im_ROI2, im_ROI2)
 
-    blue = cv2.GaussianBlur(im_ROI3, (5, 5), 0)
+    blur = cv2.GaussianBlur(im_ROI3, (5, 5), 0)
     ret, im_ROI3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     cv2.bitwise_not(im_ROI3, im_ROI3)
 
