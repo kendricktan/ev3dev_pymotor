@@ -153,8 +153,11 @@ while True:
     R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
     L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
+    R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
+    L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
+
     # If it detects line(s)
-    if len(contour_coordinates_priority) >= 3:
+    if len(contour_coordinates_priority) >= 1:
         client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
         print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
 
