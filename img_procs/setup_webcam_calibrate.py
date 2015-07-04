@@ -13,6 +13,13 @@ import numpy as np
 
 from settings import *
 
+# boundary for green filter
+GREEN_ROI = 100
+GREEN_RANGE  = [([0, 75, 0], [60, 125, 60])] # Increase B(G)R [G] range if detects fuzzy lines
+GREEN_THRESH = 25 # Lower if can't detect, higher if detects too many
+GREEN_AREA_MAX = 80000
+GREEN_AREA_MIN = 200
+
 # Loads the module for pi camera
 os.system('sudo modprobe bcm2835-v4l2')
 
@@ -30,136 +37,57 @@ while True:
     # Gets frame
     ret, frame = cap.read()
 
-    # Define our regions of interest
-    ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
-    ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
-    ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
+    # Green region of interest
+    ROI_g = frame#[GREEN_ROI:(GREEN_ROI+40), 0:320]
 
-    # Converts ROI into Grayscale
-    im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
-    im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
-    im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
+    # Green filter
+    for (lower, upper) in GREEN_RANGE:
+        # Create numpy arrays from boundaries
+        lower = np.array(lower, dtype='uint8')
+        upper = np.array(upper, dtype='uint8')
 
-    # Gaussian blur to remove the noise, and otsu binarization to
-    # create a pseudo 'adaptive' thresholding
-    # Lastly invert the colors
-    blur = cv2.GaussianBlur(im_ROI, (5, 5), 0) # (5x5) to remove the noise
-    ret, im_ROI = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    cv2.bitwise_not(im_ROI, im_ROI)
+        # Find the colors within the specific boundary and apply the mask
+        mask = cv2.inRange(ROI_g, lower, upper)
+        ROI_g = cv2.bitwise_and(ROI_g, ROI_g, mask=mask)
 
-    blur = cv2.GaussianBlur(im_ROI2, (5, 5), 0)
-    ret, im_ROI2 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    cv2.bitwise_not(im_ROI2, im_ROI2)
+    # Convert to grayscale
+    ROI_g = cv2.cvtColor(ROI_g, cv2.COLOR_BGR2GRAY)
 
-    blur = cv2.GaussianBlur(im_ROI3, (5, 5), 0)
-    ret, im_ROI3 = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    cv2.bitwise_not(im_ROI3, im_ROI3)
+    ret, ROI_g = cv2.threshold(ROI_g, 0, 255, 0)
 
-    # Reduces noise in image and dilate to increase white region
+    cv2.bitwise_not(ROI_g, ROI_g)
+
+    # Reduces noise in image and dilate to increase white region (since its negative)
     erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
     dilate_e = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5));
 
-    cv2.erode(im_ROI, erode_e)
-    cv2.dilate(im_ROI, dilate_e)
+    cv2.erode(ROI_g, erode_e)
+    cv2.dilate(ROI_g, dilate_e)
 
-    cv2.erode(im_ROI2, erode_e)
-    cv2.dilate(im_ROI2, dilate_e)
-
-    cv2.erode(im_ROI3, erode_e)
-    cv2.dilate(im_ROI3, dilate_e)
-
-
-
-    '''
     # Find contours
-    contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    ROI_g = cv2.Canny(ROI_g, 100, 200)
 
-    # Variables to store ALL contour_coordinates
-    contour_no = 0
-    contour_coordinates = []
+    contours, hierarchy = cv2.findContours(ROI_g, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    # List to store INTERESTED contour_coordinates
-    contour_coordinates_priority = []
+    c = 0
 
-    # Loop through each contours
-    for j in contours, contours2, contours3:
-        for i in j:
-            # Gets the area of each contour
-            area = cv2.contourArea(i)
 
-            # Get dictionary keys for moments
-            moments = cv2.moments (i)
-            cv2.putText(frame,'Area ' + str(contour_no+1) + " :" + str(area),(10,25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
+    for i in contours:
+        area = cv2.contourArea(i)
+        moments = cv2.moments(i)
 
-            # We only want to get an area of > the threshold to prevent not usable contours
-            if area>AREA_THRESH:
-                if moments['m00']!=0.0:
-                    if moments['m01']!=0.0:
-                        # We can calculate the centroid coordinates using this
-                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
-                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+        if area > GREEN_AREA_MIN:
+            if moments['m00'] != 0.0:
+                if moments['m01'] != 0.0:
+                    c = c + 1
+                    cx = int(moments['m10']/moments['m00'])
+                    cy = int(moments['m01']/moments['m00'])#+GREEN_ROI
 
-                        # Draw inner circle
-                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
+                    cv2.putText(frame, 'Area: ' + str(area) + '; x: ' + str(cx) + ' y: ' + str(cy), (10, 25+(c*10)), cv2.FONT_HERSHEY_PLAIN, 1,   (255, 0, 0), 2)
 
-                        # Draw outer circle
-                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
+                    cv2.circle(frame, (cx, cy), 8, BLUE_COLOR, -1)
 
-                        # Store our centroid coordinates
-                        contour_coordinates.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
 
-                        # Find contours which are closest to the middle (so PID can be performed)
-                        if len(contour_coordinates_priority) >= (contour_no+1):
-                            if abs(MIDDLE-cx) <= abs(MIDDLE-contour_coordinates_priority[contour_no][0]):
-                                contour_coordinates_priority[contour_no] = (cx, cy)
-
-                        else:
-                            contour_coordinates_priority.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
-
-        # Variable to notify us which contour we're on (contours, contours2, or contours3)
-    	contour_no += 1
-
-    # Draw interested contour coordinates
-    i = 0
-    PID_TOTAL = 0
-    for c in contour_coordinates_priority:
-        # Update PID code here
-        ERROR = MIDDLE-c[0] # Gets error between target value and actual value
-        P_VAL = KP*ERROR # Gets proportional val
-        D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
-        DERIVATOR = ERROR
-
-        #I_VAL = I_VAL + ERROR
-
-        if I_VAL > I_MAX:
-            I_VAL = I_MAX
-        elif I_VAL < I_MIN:
-            I_VAL = I_MIN
-
-        PID_VAL = P_VAL + D_VAL + I_VAL
-        PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
-
-        cv2.putText(frame, str(i) + ' PID: ' + str(PID_VAL), (CAMERA_WIDTH/2,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
-        i = i + 1
-
-        # Sends signal to ev3
-    R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
-    L_MOTOR_RPS = MOTOR_RPS-PID_TOTAL
-
-    R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
-    L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
-
-    #client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
-    #client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
-
-    cv2.putText(frame,  'PID_TOTAL: ' + str(PID_TOTAL), (CAMERA_WIDTH/4,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
-
-    #print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
-    #print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
-
-    '''
     # Overflow protection
     if counter >= sys.maxint - 100000:
         counter = 0
@@ -167,6 +95,7 @@ while True:
     # Display GUI for captured frame
     if frame is not None:
         cv2.imshow('pi camera', frame)
+        #cv2.imshow('pi camera', ROI_g)
 
     # Debug
     if cv2.waitKey(1) & 0xFF == ord('d'):
