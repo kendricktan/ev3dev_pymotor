@@ -69,6 +69,8 @@ while True:
     cv2.dilate(im_ROI3, dilate_e)
 
 
+
+    '''
     # Find contours
     contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -157,7 +159,7 @@ while True:
     #print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
     #print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
 
-
+    '''
     # Overflow protection
     if counter >= sys.maxint - 100000:
         counter = 0

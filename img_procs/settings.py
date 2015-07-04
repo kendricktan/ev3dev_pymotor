@@ -12,7 +12,7 @@ I_VAL = 0
 D_VAL = 0
 
 I_MAX = 0.01359
-I_MIN = 0
+I_MIN = -I_MAX
 
 PID_TOTAL = 0
 
