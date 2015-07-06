@@ -34,12 +34,24 @@ while True:
     ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
     ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
     ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
+    ROIg = frame [ROIg_Y:(ROIg_Y+40), 0:320]
+    
+    # Green filter
+    for (lower, upper) in GREEN_RANGE:
+        # Create numpy arrays from boundaries
+        lower = np.array(lower, dtype='uint8')
+        upper = np.array(upper, dtype='uint8')
 
+        # Find the colors within the specific boundary and apply the mask
+        mask = cv2.inRange(ROIg, lower, upper)
+        ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)  
+    
     # Converts ROI into Grayscale
     im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
     im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
     im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
-
+    im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
+    
     # Apply THRESHold filter to smoothen edges and convert images to negative
     # Maybe change to otsu or gaussian threshold
     ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
@@ -50,6 +62,9 @@ while True:
 
     ret, im_ROI3 = cv2.threshold(im_ROI3, THRESH, 255, 0)
     cv2.bitwise_not(im_ROI3, im_ROI3)
+    
+    ret, im_ROIg = cv2.threshold(im_ROIg, THRESH, 255, 0)
+    # Do NOT bitwise_not im_ROIg
 
     # Reduces noise in image and dilate to increase white region (since its negative)
     erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
@@ -68,6 +83,7 @@ while True:
     contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     # Variables to store ALL contour_coordinates
     contour_no = 0
@@ -77,7 +93,7 @@ while True:
     contour_coordinates_priority = []
 
     # Loop through each contours
-    for j in contours, contours2, contours3:
+    for j in contours, contours2, contours3, contoursg:
         for i in j:
             # Gets the area of each contour
             area = cv2.contourArea(i)
@@ -94,14 +110,19 @@ while True:
                         cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
 
-                        # Draw inner circle
-                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
-
-                        # Draw outer circle
-                        cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
-
+                        if contour_no < 3:
+                            # Draw inner circle
+                            cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
+                            # Draw outer circle
+                            cv2.circle(frame,(cx,cy+ROI_START+(ROI_DIF*contour_no)), 8, GREEN_COLOR, 0)
+                        
+                        elif contour_no >= 3:
+                            # Draw inner circle
+                            cv2.circle(frame,(cx,cy+ROIg_Y), 4, BLUE_COLOR, -1)
+                            cv2.circle(frame,(cx,cy+ROIg_Y), 8, GREEN_COLOR, 0)
+                            
                         # Store our centroid coordinates
-                        contour_coordinates.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
+                        contour_coordinates.append((cx, cy))
 
                         # Find contours which are closest to the middle (so PID can be performed)
                         if len(contour_coordinates_priority) >= (contour_no+1):
@@ -109,10 +130,10 @@ while True:
                                 contour_coordinates_priority[contour_no] = (cx, cy)
 
                         else:
-                            contour_coordinates_priority.append((cx, cy+ROI_START+(ROI_DIF*contour_no)))
+                            contour_coordinates_priority.append((cx, cy))
 
         # Variable to notify us which contour we're on (contours, contours2, or contours3)
-    	contour_no += 1
+    	contour_no += 1            
 
     # Draw interested contour coordinates
     i = 0
@@ -136,17 +157,14 @@ while True:
 
         cv2.putText(frame, str(i) + ' PID: ' + str(PID_VAL), (CAMERA_WIDTH/2,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
         i = i + 1
-
+    
         # Sends signal to ev3
     R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
     L_MOTOR_RPS = MOTOR_RPS-PID_TOTAL
 
     R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
     L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
-
-    #client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
-    #client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
-
+    
     cv2.putText(frame,  'PID_TOTAL: ' + str(PID_TOTAL), (CAMERA_WIDTH/4,160+(i*20)), cv2.FONT_HERSHEY_PLAIN, 1, YELLOW_COLOR,2)
 
     #print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
