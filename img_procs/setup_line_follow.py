@@ -57,14 +57,14 @@ while True:
 
         # Find the colors within the specific boundary and apply the mask
         mask = cv2.inRange(ROIg, lower, upper)
-        ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)  
-        
+        ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)
+
     # Converts ROI into Grayscale
     im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
     im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
-    im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)     
+    im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
     im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
-    
+
     # Apply THRESHold filter to smoothen edges and convert images to negative
     ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
     cv2.bitwise_not(im_ROI, im_ROI)
@@ -77,7 +77,7 @@ while True:
 
     ret, im_ROIg = cv2.threshold(im_ROIg, THRESH, 255, 0)
     # Do NOT bitwise_not im_ROIg
-    
+
     # Reduces noise in image and dilate to increase white region (since its negative)
     erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
     dilate_e = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5));
@@ -100,12 +100,14 @@ while True:
     # Variables to store ALL contour_coordinates
     contour_no = 0
     contour_coordinates = []
+    contourg_coordinates = []
 
     # List to store INTERESTED contour_coordinates
     contour_coordinates_priority = []
+    contourg_coordinates_priority = []
 
     # Loop through each contours
-    for j in contours, contours2, contours3, contoursg:
+    for j in contours, contours2, contours3:
         for i in j:
             # Gets the area of each contour
             area = cv2.contourArea(i)
@@ -135,6 +137,31 @@ while True:
         # Variable to notify us which contour we're on (contours, contours2, or contours3)
     	contour_no += 1
 
+    # Green filter
+    for i in contoursg:
+        area = cv2.contourArea(i)
+        moments = cv2.moments(i)
+
+        if area > GREEN_AREA_MIN and area < GREEN_AREA_MAX:
+            if moments['m00'] != 0.0:
+                if moments['m01'] != 0.0:
+                    cx = int(moments['m10']/moments['m00'])
+                    cy = int(moments['m01']/moments['m00'])
+
+                    contourg_coordinates.append((cx, cy))
+
+                    if len(contourg_coordinates_priority) >= 1:
+                        if abs(MIDDLE-cs) < abs(MIDDLE-contourg_coordinates_priority[0][0]):
+                            contourg_coodrinates_priority[0] = (cx, cy)
+
+                    else:
+                        contourg_coordinates_priority.append((cx, cy))
+
+        # If area is greater than GREEN_AREA_MAX
+        # probs at the end already (all green)
+        else:
+            pass
+
     # Draw interested contour coordinates
     i = 0
     PID_TOTAL = 0
@@ -159,6 +186,16 @@ while True:
         # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
 
         i = i + 1
+
+    # PID for green filter
+    for c in contourg_coordinates_priority:
+        ERROR = MIDDLE-c[0]
+        # Proportional should be enough for green
+        P_VAL = KP*ERROR
+
+        PID_VAL = P_VAL
+
+        PID_TOTAL += (PID_MULTI_THRES)*PID_VAL
 
     # Sends signal to ev3
     R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
