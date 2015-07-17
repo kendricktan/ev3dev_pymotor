@@ -36,13 +36,13 @@ ROI_DIF = abs(ROI2_Y-ROI_Y)
 
 # THRESHOLDING
 MIDDLE = CAMERA_WIDTH/2
-
-THRESH = 55 # Change threshold to high if can't detect line; Change to lower if detects too many
+THRESH = 85 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 200
 
 # Green filter
 ROIg_Y = 120
-GREEN_RANGE = [([0, 75, 0], [60, 125, 60])] # Increase B(G)R [G] range if detects fuzzy lines
+GREEN_P_VAL = 0.55 # PID for green val
+GREEN_RANGE = [([75, 125, 40], [175, 220, 120])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 250 # Area of contour before officially recognizing it
 

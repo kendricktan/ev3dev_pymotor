@@ -13,20 +13,6 @@ import time
 import numpy as np
 from settings import *
 
-# Initalizes tcp connection
-# Checks for usage help
-if len(sys.argv) > 1:
-    if sys.argv[1] == '-h' or sys.argv[1] == '--help':
-        print 'Usage: python setup_client.py [server ip]'
-        sys.exit()
-
-TCP_PORT = 5005
-TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((TCP_IP, 5005))
-
-print 'Successfully connected to ' + TCP_IP +  '...'
-
 # Get pi camera stream
 cap = cv2.VideoCapture(0)
 
@@ -92,10 +78,10 @@ while True:
     cv2.dilate(im_ROI3, dilate_e)
 
     # Find contours
-    contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(im_ROIg.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours2, hierarchy = cv2.findContours(im_ROI2.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours3, hierarchy = cv2.findContours(im_ROI3.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contoursg, hierarchy = cv2.findContours(im_ROIg.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     # Variables to store ALL contour_coordinates
     contour_no = 0
@@ -126,13 +112,7 @@ while True:
                         # Store our centroid coordinates
                         contour_coordinates.append((cx, cy))
 
-                        # Find contours which are closest to the middle (so PID can be performed)
-                        if len(contour_coordinates_priority) >= (contour_no+1):
-                            if abs(MIDDLE-cx) <= abs(MIDDLE-contour_coordinates_priority[contour_no][0]):
-                                contour_coordinates_priority[contour_no] = (cx, cy)
-
-                        else:
-                            contour_coordinates_priority.append((cx, cy))
+                        cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4,BLUE_COLOR, -1)
 
         # Variable to notify us which contour we're on (contours, contours2, or contours3)
     	contour_no += 1
@@ -148,16 +128,8 @@ while True:
                     cx = int(moments['m10']/moments['m00'])
                     cy = int(moments['m01']/moments['m00'])
 
-                    contourg_coordinates.append((cx, cy))
+                    cv2.circle(frame, (cx, cy+ROIg_Y), 4, BLUE_COLOR, -1)
 
-                    if len(contourg_coordinates_priority) >= 1:
-                        # Since green is indicative of where we wanna travel,
-                        # it'll be the furthest away from center
-                        if abs(MIDDLE-cx) > abs(MIDDLE-contourg_coordinates_priority[0][0]):
-                            contourg_coordinates_priority[0] = (cx, cy)
-
-                    else:
-                        contourg_coordinates_priority.append((cx, cy))
 
         # If area is greater than GREEN_AREA_MAX
         # probs at the end already (all green)
@@ -209,18 +181,13 @@ while True:
     R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
     L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
-    # If it detects line(s)
-    if len(contour_coordinates_priority) >= 1:
-        client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
-        print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+    if frame is not None:
+        #cv2.imshow('pi camera', im_ROIg)
+        cv2.imshow('pi camera', frame)
+        #cv2.imshow('pi camera', im_ROI)
 
-        client.send('left change_rps(' + str(L_MOTOR_RPS) + ')')
-        print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
-
-    # Run forever until redetects the lines
-    else:
-        client.send('run_forever')
-        print 'run_forever'
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
     # Overflow protection
     if counter >= sys.maxint - 100000:
