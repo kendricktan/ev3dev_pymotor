@@ -153,7 +153,7 @@ while True:
                     if len(contourg_coordinates_priority) >= 1:
                         # Since green is indicative of where we wanna travel,
                         # it'll be the furthest away from center
-                        if abs(MIDDLE-cx) > abs(MIDDLE-contourg_coordinates_priority[0][0]):
+                        if abs(MIDDLE-cx) >= abs(MIDDLE-contourg_coordinates_priority[0][0]):
                             contourg_coordinates_priority[0] = (cx, cy)
 
                     else:
@@ -167,37 +167,39 @@ while True:
     # Draw interested contour coordinates
     i = 0
     PID_TOTAL = 0
-    for c in contour_coordinates_priority:
-        # Update PID code here
-        ERROR = MIDDLE-c[0] # Gets error between target value and actual value
-        P_VAL = KP*ERROR # Gets proportional val
-        D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
-        DERIVATOR = ERROR
+    if len(contourg_coordinates_priority) == 0:
+        for c in contour_coordinates_priority:
+            # Update PID code here
+            ERROR = MIDDLE-c[0] # Gets error between target value and actual value
+            P_VAL = KP*ERROR # Gets proportional val
+            D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
+            DERIVATOR = ERROR
 
-        I_VAL = I_VAL + ERROR
+            I_VAL = I_VAL + ERROR
 
-        if I_VAL > I_MAX:
-            I_VAL = I_MAX
-        elif I_VAL < I_MIN:
-            I_VAL = I_MIN
+            if I_VAL > I_MAX:
+                I_VAL = I_MAX
+            elif I_VAL < I_MIN:
+                I_VAL = I_MIN
 
-        PID_VAL = P_VAL + D_VAL + I_VAL
+            PID_VAL = P_VAL + D_VAL + I_VAL
 
-        # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
-        PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
-        # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
+            # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
+            PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
+            # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
 
-        i = i + 1
+            i = i + 1
 
     # PID for green filter
-    for c in contourg_coordinates_priority:
-        ERROR = MIDDLE-c[0]
-        # Proportional should be enough for green
-        P_VAL = KP*ERROR
+    else:
+        for c in contourg_coordinates_priority:
+            ERROR = MIDDLE-c[0]
+            # Proportional should be enough for green
+            P_VAL = KP*ERROR
 
-        PID_VAL = P_VAL
+            PID_VAL = P_VAL
 
-        PID_TOTAL += PID_VAL*GREEN_P_VAL
+            PID_TOTAL += PID_VAL*GREEN_P_VAL
 
     # Sends signal to ev3
     R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL

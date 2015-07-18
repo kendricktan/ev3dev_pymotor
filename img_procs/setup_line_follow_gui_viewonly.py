@@ -78,7 +78,7 @@ while True:
     cv2.dilate(im_ROI3, dilate_e)
 
     # Find contours
-    contours, hierarchy = cv2.findContours(im_ROIg.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(im_ROI.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours2, hierarchy = cv2.findContours(im_ROI2.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contours3, hierarchy = cv2.findContours(im_ROI3.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     contoursg, hierarchy = cv2.findContours(im_ROIg.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -109,10 +109,7 @@ while True:
                         cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
 
-                        # Store our centroid coordinates
-                        contour_coordinates.append((cx, cy))
-
-                        cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4,BLUE_COLOR, -1)
+                        cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
 
         # Variable to notify us which contour we're on (contours, contours2, or contours3)
     	contour_no += 1
