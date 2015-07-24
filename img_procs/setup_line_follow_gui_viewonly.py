@@ -33,7 +33,7 @@ while True:
     ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
     ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
     ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-    ROIg = frame [ROIg_Y:(ROIg_Y+40), 0:320]
+    ROIg = frame [ROIg_Y:(ROIg_Y+120), 0:320]
 
     # Green filter
     for (lower, upper) in GREEN_RANGE:
@@ -179,8 +179,8 @@ while True:
     L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
     if frame is not None:
-        #cv2.imshow('pi camera', im_ROIg)
-        cv2.imshow('pi camera', frame)
+        cv2.imshow('pi camera', im_ROIg)
+        #cv2.imshow('pi camera', frame)
         #cv2.imshow('pi camera', im_ROI)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):

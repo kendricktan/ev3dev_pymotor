@@ -47,7 +47,7 @@ while True:
     ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
     ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
     ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-    ROIg = frame [ROIg_Y:(ROIg_Y+40), 0:320]
+    ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
 
     # Green filter
     for (lower, upper) in GREEN_RANGE:
@@ -200,6 +200,13 @@ while True:
             PID_VAL = P_VAL
 
             PID_TOTAL += PID_VAL*GREEN_P_VAL
+
+        # Refreshes PID
+        ERROR = 0
+        P_VAL = 0
+        D_VAL = 0
+        DERIVATOR = 0
+        I_VAL = 0
 
     # Sends signal to ev3
     R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
