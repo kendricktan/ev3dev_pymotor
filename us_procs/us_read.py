@@ -23,7 +23,7 @@ class us_driver:
         self.GPIO_trig = GPIO_trig
         self.GPIO_echo = GPIO_echo
 
-        time.sleep(0.03)
+        time.sleep(0.05)
 
     def read(self):
         GPIO.output(self.GPIO_trig, True)

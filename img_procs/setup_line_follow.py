@@ -218,8 +218,8 @@ while True:
     R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
     L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
-    # If it detects line(s)
-    if len(contour_coordinates_priority) >= 1:
+    # If it detects line(s) [green or black]
+    if len(contour_coordinates_priority) >= 1 or len(contourg_coordinates_priority) >= 1:
         client.send('right change_rps(' + str(R_MOTOR_RPS) + ')')
         print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
 
