@@ -70,7 +70,7 @@ class ev3dev_pymotor:
         
         # Sets position_sp
         with open(self.motor+'/position_sp', 'w') as f:
-            f.write(str(degrees))
+            f.write(str(int(degrees)))
             
         # Executes command
         with open(self.motor+'/command', 'w') as f:
