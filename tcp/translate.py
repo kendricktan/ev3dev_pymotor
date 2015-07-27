@@ -45,7 +45,7 @@ def translate(raw_str):
             except:
                 pass
                 
-        elif 'run_to_rel_pos' in str[0]:
+        elif 'run_to_rel_pos' in _str[0]:
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
@@ -87,7 +87,7 @@ def translate(raw_str):
             except:
                 pass
                 
-        elif 'run_to_rel_pos' in str[1]:
+        elif 'run_to_rel_pos' in _str[1]:
             try:
                 args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
                 motors[_str[0]].run_to_rel_pos(float(args))
