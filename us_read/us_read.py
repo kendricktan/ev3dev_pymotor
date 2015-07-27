@@ -41,10 +41,3 @@ class us_driver:
 
         return timepassed * 17000 # in cm
 
-
-us_sens01 = us_driver(14, 15)
-
-for x in range(0, 100):
-    print us_sens01.read()#!/usr/bin/python
-    time.sleep(0.01)
-

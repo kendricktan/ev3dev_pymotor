@@ -36,7 +36,7 @@ ROI_DIF = abs(ROI2_Y-ROI_Y)
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 75 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 95 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 1000
 
 # Green filter thresholding
@@ -47,7 +47,7 @@ GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 1000 # Area of contour before officially recognizing it
 
 # Ultrasonic thresholding
-US_MIN_DIST = 5 # in cm
+US_MIN_DIST = 10 # in cm
 
 # COLORS (BGR)
 RED_COLOR = (43, 57, 192)

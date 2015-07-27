@@ -17,29 +17,39 @@ class img_procs:
     def __init__(self):
         # Get pi camera stream
         self.cap = cv2.VideoCapture(0)
-        
+
         # Sets the resolution of the stream
         self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-        
+
         self.is_show_gui = False
-        
+
+        self.is_print_cmd = True
+
     # Does it show the GUI for img processing
     def show_gui(self, is_show):
         self.is_show_gui = is_show
-       
+
+    # Does it print the left/right motor cmd
+    # after processing it
+    def print_cmd(self, is_print):
+        self.is_print_cmd = is_print
+
     # Updates video camera stream and applies PID algorithm
-    # to obtain motor rotation RPS 
+    # to obtain motor rotation RPS
     def update(self):
+        # Define our global variables from settings.py
+        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+
         # Gets frame from capture device
         ret, frame = self.cap.read()
-        
-        # Define our regions of interest        
+
+        # Define our regions of interest
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
         ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
-        
+
         # Green filter
         for (lower, upper) in GREEN_RANGE:
             # Create numpy arrays from boundaries
@@ -85,7 +95,7 @@ class img_procs:
         # Find contours
         # If we wanna show the images, we want to show
         # the UNALTERED (in the process of finding contours) images
-        # so we can calibrate lighting        
+        # so we can calibrate lighting
         if self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours2, hierarchy = cv2.findContours(im_ROI2.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -93,7 +103,7 @@ class img_procs:
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         # if we don't want to see the gui we don't do that
         # so its more effective
-        else:
+        elif not self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -130,7 +140,7 @@ class img_procs:
                             # indicating where we found the lines
                             if self.is_show_gui:
                                 cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
-                                
+
                             # Store our centroid coordinates
                             contour_coordinates.append(cx)
 
@@ -155,7 +165,7 @@ class img_procs:
                     if moments['m01'] != 0.0:
                         cx = int(moments['m10']/moments['m00'])
                         cy = int(moments['m01']/moments['m00'])
-                        
+
                         # If we're showing our GUI
                         # needa indicate where we found
                         # the green box
@@ -210,7 +220,7 @@ class img_procs:
                 # Since we have 3 different readings at three different locations
                 # we give each reading a different weighting
                 # the further it is the smaller affect it will have on the PID value
-                # i is used to determine the weighting of each contour found                
+                # i is used to determine the weighting of each contour found
                 i = i + 1
 
         # PID for green filter
@@ -241,40 +251,46 @@ class img_procs:
         # Only want 2 decimal places
         R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
         L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
-        
+
         # If it detects line(s) [green or black]
         if len(contour_coordinates_priority) >= 1 or len(contourg_coordinates_priority) >= 1:
             # Saves right motor command
             self.rmotor_cmd = 'right change_rps(' + str(R_MOTOR_RPS) + ')'
-            print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
+            if not self.is_show_gui:
+                if self.is_print_cmd:
+                    print 'right change_rps(' + str(R_MOTOR_RPS) + ')'
 
             # Saves left motor command
             self.lmotor_cmd = 'left change_rps(' + str(L_MOTOR_RPS) + ')'
-            print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
+            if not self.is_show_gui:
+                if self.is_print_cmd:
+                    print 'left change_rps(' + str(L_MOTOR_RPS) + ')'
 
         # Run forever until redetects the lines
         else:
             self.rmotor_cmd = 'right run_forever'
             self.lmotor_cmd = 'left run_forever'
-            print 'run_forever'
-            
+            if not self.is_show_gui:
+                if self.is_print_cmd:
+                    print 'run_forever'
+
         # If we wanna see gui
         if self.is_show_gui:
             if frame is not None:
-                cv2.imshow('pi camera', im_ROIg)
-                #cv2.imshow('pi camera', frame)
+                #cv2.imshow('pi camera', im_ROIg)
+                cv2.imshow('pi camera', frame)
                 #cv2.imshow('pi camera', im_ROI)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
-    
+
     def get_rmotor_cmd(self):
         return self.rmotor_cmd
-        
+
     def get_lmotor_cmd(self):
         return self.lmotor_cmd
-        
+
     def __del__(self):
         self.cap.release()
-        cv2.destroAllWindows()
-    
+        cv2.destroyAllWindows()
+
