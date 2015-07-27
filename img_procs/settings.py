@@ -43,8 +43,8 @@ AREA_THRESH = 1000
 H_MIDDLE = CAMERA_HEIGHT/2
 
 ROIh_X = CAMERA_WIDTH/2
-ROIh_HEIGHT = 80
-
+ROIh_HEIGHT = 15
+H_ALIGN_THRES = 3 # How many coordinates can the horizontal line be off by from (CAMERA_HEIGHT-ROIh_HEIGHT)+(ROIh_HEIGHT/2)
 
 # Green filter thresholding
 ROIg_Y = 120 # or 120
