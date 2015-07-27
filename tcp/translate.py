@@ -89,7 +89,7 @@ def translate(raw_str):
                 
         elif 'run_to_rel_pos' in str[1]:
             try:
-                args = _str[1][_str[1].find('(')+1:_str[1].find(')')]]
+                args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
                 motors[_str[0]].run_to_rel_pos(float(args))
             except:
                 pass
