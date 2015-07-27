@@ -59,4 +59,5 @@ stop # stops motor
 change_rps(x) # Changes motor rotation per second to 'x' AND runs it
 set_rps(x) # Sets motor rotation per second to 'x' but DOESN'T run it
 toggle # Toggles motors direction
+run_to_rel_position(x) # Runs motor to relative position 'x'
 ```

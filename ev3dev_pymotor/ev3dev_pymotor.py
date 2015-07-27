@@ -61,6 +61,21 @@ class ev3dev_pymotor:
     def change_rps(self, rps):
         self.set_rps(rps)
         self.run_forever()
+        
+    # Runs motor to relative position  
+    def run_to_rel_pos(self, degrees):
+        # Stops motors in order to avoid 
+        # clashing commands
+        self.stop()
+        
+        # Sets position_sp
+        with open(self.motor+'/position_sp', 'w') as f:
+            f.write(str(degrees))
+            
+        # Executes command
+        with open(self.motor+'/command', 'w') as f:
+            f.write('run-to-rel-pos')
+            
 
     # Toggles motor polarity and therefore direction
     def toggle(self):

@@ -44,6 +44,14 @@ def translate(raw_str):
                     motors[motor].change_rps(float(args))
             except:
                 pass
+                
+        elif 'run_to_rel_pos' in str[0]:
+            try:
+                args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
+                for motor in motors:
+                    motors[motor].run_to_rel_pos(float(args))
+            except:
+                pass
 
     elif len(_str) > 1:
 
@@ -76,5 +84,12 @@ def translate(raw_str):
             try:
                 args = _str[1][_str[1].find('(')+1:_str[1].find(')')]
                 motors[_str[0]].change_rps(float(args))
+            except:
+                pass
+                
+        elif 'run_to_rel_pos' in str[1]:
+            try:
+                args = _str[1][_str[1].find('(')+1:_str[1].find(')')]]
+                motors[_str[0]].run_to_rel_pos(float(args))
             except:
                 pass
