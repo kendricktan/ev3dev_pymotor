@@ -266,7 +266,7 @@ class img_procs:
                 #cv2.imshow('pi camera', im_ROI)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+                self.__del__()
     
     def get_rmotor_cmd(self):
         return self.rmotor_cmd

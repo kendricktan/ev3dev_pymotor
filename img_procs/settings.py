@@ -34,17 +34,20 @@ ROI3_Y = 180 # DON'T EXCEED 200
 ROI_START = ROI_Y
 ROI_DIF = abs(ROI2_Y-ROI_Y)
 
-# THRESHOLDING
+# Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
 THRESH = 75 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 1000
 
-# Green filter
+# Green filter thresholding
 ROIg_Y = 120 # or 120
 GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([85, 105, 65], [115, 145, 95])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 1000 # Area of contour before officially recognizing it
+
+# Ultrasonic thresholding
+US_MIN_DIST = 5 # in cm
 
 # COLORS (BGR)
 RED_COLOR = (43, 57, 192)
