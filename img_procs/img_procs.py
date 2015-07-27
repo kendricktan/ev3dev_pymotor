@@ -284,6 +284,110 @@ class img_procs:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
 
+    # Aligns robot with a horizontal (black) line
+    # Is behind states if the line is behind robot or not
+    def align_horizontal_line(self, is_behind):
+        global CAMERA_WIDTH, H_MIDDLE, ROIh_X, ROIh_HEIGHT, THRESH, AREA_THRESH
+        
+        # Gets frame from capture device
+        ret, frame = self.cap.read()
+
+        # Define our regions of interest
+        ROI_LEFT = frame [H_MIDDLE:(H_MIDDLE+ROIh_HEIGHT), 0:H_MIDDLE]
+        ROI_RIGHT = frame [H_MIDDLE:(H_MIDDLE+ROIh_HEIGHT), H_MIDDLE:CAMERA_WIDTH]
+        
+        # Converts ROI into Grayscale
+        im_ROI_LEFT = cv2.cvtColor(ROI_LEFT, cv2.COLOR_BGR2GRAY)
+        im_ROI_RIGHT = cv2.cvtColor(ROI_RIGHT, cv2.COLOR_BGR2GRAY)
+        
+        # Apply THRESHold filter to smoothen edges and convert images to negative
+        ret, im_ROI_LEFT = cv2.threshold(im_ROI_LEFT, THRESH, 255, 0)
+        cv2.bitwise_not(im_ROI_LEFT, im_ROI_LEFT)
+
+        ret, im_ROI_RIGHT = cv2.threshold(im_ROI_RIGHT, THRESH, 255, 0)
+        cv2.bitwise_not(im_ROI_RIGHT, im_ROI_RIGHT)
+        
+        # Reduces noise in image and dilate to increase white region (since its negative)
+        erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
+        dilate_e = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5));
+
+        cv2.erode(im_ROI_LEFT, erode_e)
+        cv2.dilate(im_ROI_LEFT, dilate_e)
+
+        cv2.erode(im_ROI_RIGHT, erode_e)
+        cv2.dilate(im_ROI_RIGHT, dilate_e)
+        
+        # Find contours
+        contours_left, hierarchy = cv2.findContours(im_ROI_LEFT,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        contours_right, hierarchy = cv2.findContours(im_ROI_RIGHT,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Dictionary to store our coordinates
+        blackline_found = {}
+        blackline_found['left'] = False
+        blackline_found['right'] = False
+        
+        # Loops through each contour
+        for i in contours_left:
+            # Gets the area of each contour
+            area = cv2.contourArea(i)
+
+            # Get dictionary keys for moments
+            moments = cv2.moments (i)
+
+            # We only want to get an area of > the threshold to prevent not usable contours
+            if area>AREA_THRESH:
+                if moments['m00']!=0.0:
+                    if moments['m01']!=0.0:
+                        # We can calculate the centroid coordinates using this
+                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
+                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+                        
+                        # We only care if there is a region of black within the line
+                        # And we therefore know if we need to continue moving or not
+                        blackline_found['left'] = True
+                        break
+                            
+        # Loops through each contour
+        for i in contours_right:
+            # Gets the area of each contour
+            area = cv2.contourArea(i)
+
+            # Get dictionary keys for moments
+            moments = cv2.moments (i)
+
+            # We only want to get an area of > the threshold to prevent not usable contours
+            if area>AREA_THRESH:
+                if moments['m00']!=0.0:
+                    if moments['m01']!=0.0:
+                        # We can calculate the centroid coordinates using this
+                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
+                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+                        
+                        # We only care if there is a region of black within the line
+                        # And we therefore know if we need to continue moving or not
+                        blackline_found['right'] = True
+                        break
+        
+        # Out const rps                  
+        const_rps = 0.5
+        
+        if is_behind:
+            const_rps = -0.5
+        
+        # If it doesn't detect a black line on left
+        # Continue moving backwards/forwards depending
+        # on parameter
+        if not contour_coordinates['left']:            
+            self.lmotor_cmd = 'left change_rps('+str(const_rps)+')'
+        elif contour_coordinates['left']:
+            self.lmotor_cmd = 'left stop'
+            
+        # Same thing for right
+        if not contour_coordinates['right']:            
+            self.rmotor_cmd = 'right change_rps('+str(const_rps)+')'
+        elif contour_coordinates['right']:
+            self.rmotor_cmd = 'right stop'            
+
     def get_rmotor_cmd(self):
         return self.rmotor_cmd
 

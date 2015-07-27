@@ -39,6 +39,13 @@ MIDDLE = CAMERA_WIDTH/2
 THRESH = 95 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 1000
 
+# Settings for horizontal line alignment
+H_MIDDLE = CAMERA_HEIGHT/2
+
+ROIh_X = CAMERA_WIDTH/2
+ROIh_HEIGHT = 80
+
+
 # Green filter thresholding
 ROIg_Y = 120 # or 120
 GREEN_P_VAL = 0.83 # PID for green val
