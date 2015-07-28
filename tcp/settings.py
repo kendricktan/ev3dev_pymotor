@@ -1,7 +1,12 @@
 from resources import *
 
 ### Configuration for special functions ###
+# Motor rotations to turn clockwise/anticlockwise by 90 degrees
 MOTOR_ROTATION_TO_90_DEGREES = 215
+
+# Motor RPS for avoiding object
+OUTTER_MOTOR_AVOID_RPS = 0.81
+INNER_MOTOR_AVOID_RPS = 0.40
 
 ### Motor configuration ###
 motors = {}

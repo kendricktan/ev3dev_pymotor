@@ -12,6 +12,7 @@ class server_tcp:
 
     def __init__(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.TCP_IP, self.TCP_PORT))
         self.s.listen(1)
 
@@ -37,7 +38,7 @@ class server_tcp:
             # Add moving robocup arm here
             else:
                 translate(self.data)
-                print self.data
+                #print self.data
 
     def __del__(self):
         # Close connection

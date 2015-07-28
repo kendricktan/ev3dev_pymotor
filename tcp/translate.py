@@ -3,6 +3,8 @@ import time
 
 # Format: [left|right] [command (i.e run_forever, change_rps(0.5)...]
 def translate(raw_str):
+    global OUTTER_MOTOR_AVOID_RPS, INNER_MOTOR_AVOID_RPS, MOTOR_ROTATION_TO_90_DEGREES
+
     _str = raw_str.split()
 
     # If not specify which motor
@@ -89,7 +91,7 @@ def translate(raw_str):
 
         # Phase 1 for avoiding object detected by ultrasonic sensor
         # Assuming object is around the standard dimensions of 1.x litre bottle
-        elif 'us_avoid_object_1' in _str[0]:
+        elif 'us_avoid_object' in _str[0]:
             try:
                 # Rotates 90 degrees
                 for motor in motors:
@@ -100,7 +102,7 @@ def translate(raw_str):
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
 
                 # Allows motors to finish executing command before continuing
-                time.sleep(1.85)
+                time.sleep(1.6)
 
                 # Stops for safety and sanity check
                 for motor in motors:
@@ -108,42 +110,23 @@ def translate(raw_str):
 
                 time.sleep(0.5)
 
-                # Runs upward a bit so that it can realign itself
-                # with the black line
-                for motor in motors:
-                    motors[motor].run_to_rel_pos(100)
-
-                time.sleep(0.75)
-
-                # Stop for sanity/safety check
-                for motor in motors:
-                    motors[motors].stop()
-
-                time.sleep(0.5)
-
-            except:
-                pass
-
-        # Phase 2 for avoiding object detected by ultrasonic sensor
-        # Assuming object is around the standard dimensions of 1.x litre bottle
-        elif 'us_avoid_object_2' in _str[0]:
-            try:
-
                 # Runs motor with variable speed so robot can
                 # 'circulate' object
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].change_rps(0.82)
+                        motors[motor].change_rps(OUTTER_MOTOR_AVOID_RPS)
                     elif 'right' in motor:
-                        motors[motor].change_rps(0.4)
+                        motors[motor].change_rps(INNER_MOTOR_AVOID_RPS)
 
                 # Time needed to circulate object
-                time.sleep(4.5)
+                time.sleep(6.55)
 
                 # Stops motor
                 # Sanity/safety check
                 for motor in motors:
                     motors[motor].stop()
+
+                time.sleep(0.5)
 
                 # Assuming we've reached the black line
                 # Turn 90 degrees to realign with line
@@ -159,6 +142,9 @@ def translate(raw_str):
                 # Stops motor
                 for motor in motors:
                     motors[motor].stop()
+
+                time.sleep(0.05)
+
             except:
                 pass
 
