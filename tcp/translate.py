@@ -1,4 +1,5 @@
 from settings import *
+import time
 
 # Format: [left|right] [command (i.e run_forever, change_rps(0.5)...]
 def translate(raw_str):
@@ -7,6 +8,7 @@ def translate(raw_str):
     # If not specify which motor
     # automatically assumes all motors
     # in list
+    # Special functions will also be translated here
     if len(_str) <= 1:
         if 'run_forever' in _str[0]:
     	    try:
@@ -44,7 +46,7 @@ def translate(raw_str):
                     motors[motor].change_rps(float(args))
             except:
                 pass
-                
+
         elif 'run_to_rel_pos' in _str[0]:
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
@@ -53,6 +55,116 @@ def translate(raw_str):
             except:
                 pass
 
+        ### Special commands ###
+
+        # Turns 90 degrees anti clockwise
+        elif 'anticlockwise_90' in _str[0]:
+            try:
+                for motor in motors:
+                    # Assuming motor has 'left' motor
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+
+                    # Allows motors to finish executing command before continuing
+                    time.sleep(1.85)
+
+            except:
+                pass
+
+        # Turns 90 degrees clockwise
+        elif 'clockwise_90' in _str[0]:
+            try:
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+
+                time.sleep(1.85)
+
+            except:
+                pass
+
+        # Phase 1 for avoiding object detected by ultrasonic sensor
+        # Assuming object is around the standard dimensions of 1.x litre bottle
+        elif 'us_avoid_object_1' in _str[0]:
+            try:
+                # Rotates 90 degrees
+                for motor in motors:
+                    # Assuming motor has 'left' motor
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+
+                # Allows motors to finish executing command before continuing
+                time.sleep(1.85)
+
+                # Stops for safety and sanity check
+                for motor in motors:
+                    motors[motor].stop()
+
+                time.sleep(0.5)
+
+                # Runs upward a bit so that it can realign itself
+                # with the black line
+                for motor in motors:
+                    motors[motor].run_to_rel_pos(100)
+
+                time.sleep(0.75)
+
+                # Stop for sanity/safety check
+                for motor in motors:
+                    motors[motors].stop()
+
+                time.sleep(0.5)
+
+            except:
+                pass
+
+        # Phase 2 for avoiding object detected by ultrasonic sensor
+        # Assuming object is around the standard dimensions of 1.x litre bottle
+        elif 'us_avoid_object_2' in _str[0]:
+            try:
+
+                # Runs motor with variable speed so robot can
+                # 'circulate' object
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].change_rps(0.82)
+                    elif 'right' in motor:
+                        motors[motor].change_rps(0.4)
+
+                # Time needed to circulate object
+                time.sleep(4.5)
+
+                # Stops motor
+                # Sanity/safety check
+                for motor in motors:
+                    motors[motor].stop()
+
+                # Assuming we've reached the black line
+                # Turn 90 degrees to realign with line
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+
+                # Wait till command finishes executing before sleeping
+                time.sleep(1.85)
+
+                # Stops motor
+                for motor in motors:
+                    motors[motor].stop()
+            except:
+                pass
+
+
+    # If specify which motor beforehand then
+    # only moves that motor
     elif len(_str) > 1:
 
         if 'run_forever' in _str[1]:
@@ -86,7 +198,7 @@ def translate(raw_str):
                 motors[_str[0]].change_rps(float(args))
             except:
                 pass
-                
+
         elif 'run_to_rel_pos' in _str[1]:
             try:
                 args = _str[1][_str[1].find('(')+1:_str[1].find(')')]

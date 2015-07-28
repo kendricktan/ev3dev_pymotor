@@ -1,5 +1,5 @@
 import glob
-
+from settings import *
 # Class initalize example:
 # ev3dev_pymotor('outA', 'outB') <-- outA for left motor, outB for right motor
 
@@ -15,7 +15,7 @@ class ev3dev_pymotor:
     # Destructor
     def __del__(self):
         self.stop()
-        
+
     # Initializes motor settings
     def init_settings(self):
         # Initializes the motor numbers via the output port
@@ -37,7 +37,7 @@ class ev3dev_pymotor:
             f.write('brake')
 
     # Setters
-    
+
     # Set rotations per second
     # 360 tacho count = 1 revolution
     def set_rps(self, rps):
@@ -61,21 +61,21 @@ class ev3dev_pymotor:
     def change_rps(self, rps):
         self.set_rps(rps)
         self.run_forever()
-        
-    # Runs motor to relative position  
+
+    # Runs motor to relative position
     def run_to_rel_pos(self, degrees):
-        # Stops motors in order to avoid 
+        # Stops motors in order to avoid
         # clashing commands
         self.stop()
-        
+
         # Sets position_sp
         with open(self.motor+'/position_sp', 'w') as f:
             f.write(str(int(degrees)))
-            
+
         # Executes command
         with open(self.motor+'/command', 'w') as f:
             f.write('run-to-rel-pos')
-            
+
 
     # Toggles motor polarity and therefore direction
     def toggle(self):
@@ -88,13 +88,12 @@ class ev3dev_pymotor:
 
             self.run_forever()
 
-    
     # Getters
-    
+
     # Gets current rotation per second
     def get_rps(self):
         with open(self.motor+'/speed_sp', 'r+b') as f:
-            return f.read()            
-    
+            return f.read()
+
     def debug(self):
         print self.motor

@@ -396,6 +396,15 @@ class img_procs:
         if blackline_found['right'] and blackline_found['left']:
             self.is_aligned_hori = True
 
+    # Reset PID value to prevent random movement
+    def reset_PID(self):
+        global ERROR, P_VAL, D_VAL, DERIVATOR, I_VAL
+        ERROR = 0
+        P_VAL = 0
+        D_VAL = 0
+        DERIVATOR = 0
+        I_VAL = 0
+
     def set_is_aligned_hori(self, is_aligned):
         self.is_aligned_hori = is_aligned
 

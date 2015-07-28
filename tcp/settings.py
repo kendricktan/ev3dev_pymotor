@@ -1,5 +1,8 @@
 from resources import *
 
+### Configuration for special functions ###
+MOTOR_ROTATION_TO_90_DEGREES = 215
+
 ### Motor configuration ###
 motors = {}
 
