@@ -119,7 +119,7 @@ def translate(raw_str):
                         motors[motor].change_rps(INNER_MOTOR_AVOID_RPS)
 
                 # Time needed to circulate object
-                time.sleep(6.55)
+                time.sleep(6.15)
 
                 # Stops motor
                 # Sanity/safety check

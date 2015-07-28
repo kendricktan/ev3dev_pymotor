@@ -5,8 +5,8 @@ from resources import *
 MOTOR_ROTATION_TO_90_DEGREES = 215
 
 # Motor RPS for avoiding object
-OUTTER_MOTOR_AVOID_RPS = 0.81
-INNER_MOTOR_AVOID_RPS = 0.40
+OUTTER_MOTOR_AVOID_RPS = 0.80
+INNER_MOTOR_AVOID_RPS = 0.375
 
 ### Motor configuration ###
 motors = {}
