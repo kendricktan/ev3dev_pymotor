@@ -22,8 +22,13 @@ client.send('us_avoid_object_1')
 time.sleep(5)
 
 # before aligning to horizontal line
+# always set is_aligned_hori to false
+pi_img_procs.set_is_aligned_hori(False)
 while not pi_img_procs.is_aligned_hori:
-    pi_img_procs.align_horizontal_line(False)
+    # align_horizontal_line accepts a boolean parameter
+    # True if going backwards
+    # False if going forwards
+    pi_img_procs.align_horizontal_line(True)
     client.send(pi_img_procs.get_rmotor_cmd())
     client.send(pi_img_procs.get_lmotor_cmd())
 
