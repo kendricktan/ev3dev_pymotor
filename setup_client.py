@@ -41,32 +41,32 @@ while True:
 
         start_time = time.time()
 
-        if obj_dist <= US_MIN_DIST:
-            # Special command to avoid
-            # objects detected by ultrasonic sensor
+        if obj_dist <= US_START_DIST:
+            while obj_dist > US_MIN_DIST and obj_dist <= US_START_DIST:
+                pi_img_procs.update()
 
-            # Phase 1 of 2
-            client.send('us_avoid_object_1')
+                # We want slower speed now...
+                client.send('right change_rps('+ str(pi_img_procs.get_rmotor_value()/3) +')')
+                client.send('left change_rps('+ str(pi_img_procs.get_lmotor_value()/3) +')')
 
-            # Allows command to finish running
-            time.sleep(5)
+                obj_dist = us_sens01.read()
+                time.sleep(0.01)
 
-            # before aligning to horizontal line
-            while not pi_img_procs.is_aligned:
-                pi_img_procs.align_horizontal_line(False)
-                client.send(pi_img_procs.get_rmotor_cmd())
-                client.send(pi_img_procs.get_lmotor_cmd())
+            if obj_dist <= US_MIN_DIST:
+                # Safety check
+                time.sleep(0.25)
+                client.send('stop')
+                time.sleep(0.25)
 
-            time.sleep(0.5)
+                # Special command to avoid
+                # objects detected by ultrasonic sensor
+                client.send('us_avoid_object')
 
-            # Phase 2 of 2
-            client.send('us_avoid_object_2')
+                # Allows command to finish running
+                time.sleep(12.5)
 
-            # Waits for command to complete
-            time.sleep(8)
-
-            # Resets PID value to prevent random movement
-            pi_img_procs.reset_PID()
+                # Resets PID value to prevent random movement
+                pi_img_procs.reset_PID()
 
     # Updates camera feed
     pi_img_procs.update()

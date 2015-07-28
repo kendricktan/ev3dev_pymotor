@@ -22,9 +22,16 @@ class img_procs:
         self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
+        # Does it show the GUI by default
         self.is_show_gui = False
 
+        # Which img to show (if shows GUI)
+        # 0 = frame, 1 = ROI, 2 = ROI2, 3 = ROI3, 4 = ROIg
+        self.img_enum = 0
+
+        # Does it print the commands of each motor
         self.is_print_cmd = True
+
 
     # Does it show the GUI for img processing
     def show_gui(self, is_show):
@@ -249,8 +256,8 @@ class img_procs:
         L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
         # Only want 2 decimal places
-        R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
-        L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
+        self.rmotor_value = R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
+        self.lmotor_value = L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
         # If it detects line(s) [green or black]
         if len(contour_coordinates_priority) >= 1 or len(contourg_coordinates_priority) >= 1:
@@ -277,9 +284,21 @@ class img_procs:
         # If we wanna see gui
         if self.is_show_gui:
             if frame is not None:
-                #cv2.imshow('pi camera', im_ROIg)
-                cv2.imshow('pi camera', frame)
-                #cv2.imshow('pi camera', im_ROI)
+                if self.img_enum == 0:
+                    cv2.imshow('pi camera', frame)
+
+                elif self.img_enum == 1:
+                    cv2.imshow('pi camera', im_ROI)
+
+                elif self.img_enum == 2:
+                    cv2.imshow('pi camera', im_ROI2)
+
+                elif self.img_enum == 3:
+                    cv2.imshow('pi camera', im_ROI3)
+
+                elif self.img_enum == 4:
+                    cv2.imshow('pi camera', im_ROIg)
+
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
@@ -396,6 +415,9 @@ class img_procs:
         if blackline_found['right'] and blackline_found['left']:
             self.is_aligned_hori = True
 
+    def show_which_img(self, enum_var):
+        self.img_enum = enum_var
+
     # Reset PID value to prevent random movement
     def reset_PID(self):
         global ERROR, P_VAL, D_VAL, DERIVATOR, I_VAL
@@ -410,6 +432,12 @@ class img_procs:
 
     def is_aligned_hori(self):
         return self.is_aligned_hori
+
+    def get_rmotor_value(self):
+        return self.rmotor_value
+
+    def get_lmotor_value(self):
+        return self.lmotor_value
 
     def get_rmotor_cmd(self):
         return self.rmotor_cmd

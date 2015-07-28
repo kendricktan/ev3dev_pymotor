@@ -65,8 +65,10 @@ def translate(raw_str):
                 for motor in motors:
                     # Assuming motor has 'left' motor
                     if 'left' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
                     elif 'right' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
 
                     # Allows motors to finish executing command before continuing
@@ -80,8 +82,10 @@ def translate(raw_str):
             try:
                 for motor in motors:
                     if 'left' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
                     elif 'right' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
 
                 time.sleep(1.85)
@@ -93,12 +97,16 @@ def translate(raw_str):
         # Assuming object is around the standard dimensions of 1.x litre bottle
         elif 'us_avoid_object' in _str[0]:
             try:
+                # Needa set speed to 0.75 rps as
+                # it was tested under those conditions
                 # Rotates 90 degrees
                 for motor in motors:
                     # Assuming motor has 'left' motor
                     if 'left' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
                     elif 'right' in motor:
+                        motors[motor].set_rps(0.75)
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
 
                 # Allows motors to finish executing command before continuing

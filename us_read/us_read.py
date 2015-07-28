@@ -2,6 +2,8 @@
 
 import time
 import RPi.GPIO as GPIO
+from settings import *
+
 # remember to change the GPIO values below to match your sensors
 # GPIO output = the pin that's connected to "Trig" on the sensor
 # GPIO input = the pin that's connected to "Echo" on the sensor
