@@ -1,5 +1,4 @@
 import glob
-from settings import *
 # Class initalize example:
 # ev3dev_pymotor('outA', 'outB') <-- outA for left motor, outB for right motor
 
