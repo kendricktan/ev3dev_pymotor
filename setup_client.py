@@ -28,7 +28,7 @@ pi_img_procs.print_cmd(False)
 #pi_img_procs.show_gui(True)
 
 # Initialize Ultrasonic sensor class
-us_sens01 = us_driver(14, 15)
+us_sens01 = us_read(14, 15)
 
 # Get current start time
 start_time = time.time()

@@ -8,7 +8,7 @@ from settings import *
 # GPIO output = the pin that's connected to "Trig" on the sensor
 # GPIO input = the pin that's connected to "Echo" on the sensor
 
-class us_driver:
+class us_read:
     def __init__(self, GPIO_trig, GPIO_echo):
         # Disable warnings
         GPIO.setwarnings(False)
