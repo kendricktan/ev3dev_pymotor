@@ -186,7 +186,7 @@ class img_procs:
                             # Since green is indicative of where we wanna travel,
                             # we'll calculate the PID from the contour
                             # furthest away from center
-                            if abs(MIDDLE-cx) >= abs(MIDDLE-contourg_coordinates_priority[0][0]):
+                            if abs(MIDDLE-cx) >= abs(MIDDLE-contourg_coordinates_priority[0]):
                                 # We only care about the x coordinates
                                 contourg_coordinates_priority[0] = cx
 

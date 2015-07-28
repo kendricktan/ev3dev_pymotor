@@ -68,6 +68,9 @@ while True:
                 # Resets PID value to prevent random movement
                 pi_img_procs.reset_PID()
 
+                # Just for safety
+                time.sleep(1.0)
+
     # Updates camera feed
     pi_img_procs.update()
 

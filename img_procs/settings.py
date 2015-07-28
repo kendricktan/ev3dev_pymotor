@@ -36,7 +36,7 @@ ROI_DIF = abs(ROI2_Y-ROI_Y)
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 100 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 90 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 850
 
 # Settings for horizontal line alignment
