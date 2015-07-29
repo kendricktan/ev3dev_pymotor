@@ -64,7 +64,7 @@ def translate(raw_str):
             try:
                 for motor in motors:
                     motors[motor].set_rps(0.75)
-                    
+
                     # Assuming motor has 'left' motor
                     if 'left' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
@@ -82,8 +82,8 @@ def translate(raw_str):
             try:
                 for motor in motors:
                     motors[motor].set_rps(0.75)
-                    
-                    if 'left' in motor:                        
+
+                    if 'left' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
@@ -102,9 +102,9 @@ def translate(raw_str):
                 # Rotates 90 degrees
                 for motor in motors:
                     motors[motor].set_rps(0.75)
-                    
+
                     # Assuming motor has 'left' motor
-                    if 'left' in motor:                        
+                    if 'left' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
@@ -127,7 +127,7 @@ def translate(raw_str):
                         motors[motor].change_rps(INNER_MOTOR_AVOID_RPS)
 
                 # Time needed to circulate object
-                time.sleep(6.15)
+                time.sleep(6.25)
 
                 # Stops motor
                 # Sanity/safety check
