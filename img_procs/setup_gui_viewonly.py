@@ -12,7 +12,8 @@ pi_img_procs.show_gui(True)
 # ROI2 = 2
 # ROI3 = 3
 # ROI4 = 4
-pi_img_procs.show_which_img(2)
+img_enum = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+pi_img_procs.show_which_img(img_enum)
 
 while True:
     pi_img_procs.update()
