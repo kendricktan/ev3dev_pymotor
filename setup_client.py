@@ -22,7 +22,7 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 pi_img_procs = img_procs()
 
 # comment if you want to print the commands
-pi_img_procs.print_cmd(False)
+pi_img_procs.print_cmd(True)
 
 # uncomment if you want to show gui
 #pi_img_procs.show_gui(True)

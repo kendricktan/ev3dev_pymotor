@@ -46,7 +46,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, ROIh_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR, H_BLACK_LINE_THRESH
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
@@ -56,6 +56,7 @@ class img_procs:
         ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
         ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
+        #ROIh = frame [ROIh_Y:(ROIg_Y), 0:320] # ROI horizontal (to detect black lines above green lines to aid it in deathtrap)
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -72,6 +73,7 @@ class img_procs:
         im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
         im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
         im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
+        #im_ROIh = cv2.cvtColor(ROIh, cv2.COLOR_BGR2GRAY)
 
         # Apply THRESHold filter to smoothen edges and convert images to negative
         ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
@@ -83,8 +85,11 @@ class img_procs:
         ret, im_ROI3 = cv2.threshold(im_ROI3, THRESH, 255, 0)
         cv2.bitwise_not(im_ROI3, im_ROI3)
 
-        ret, im_ROIg = cv2.threshold(im_ROIg, THRESH, 255, 0)
+        ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
         # Do NOT bitwise_not im_ROIg
+
+        #ret, im_ROIh = cv2.threshold(im_ROIh, H_BLACK_LINE_THRESH, 255, 0)
+        #cv2.bitwise_not(im_ROIh, im_ROIh)
 
         # Reduces noise in image and dilate to increase white region (since its negative)
         erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
@@ -99,6 +104,9 @@ class img_procs:
         cv2.erode(im_ROI3, erode_e)
         cv2.dilate(im_ROI3, dilate_e)
 
+        #cv2.erode(im_ROIh, erode_e)
+        #cv2.dilate(im_ROIh, dilate_e)
+
         # Find contours
         # If we wanna show the images, we want to show
         # the UNALTERED (in the process of finding contours) images
@@ -108,6 +116,8 @@ class img_procs:
             contours2, hierarchy = cv2.findContours(im_ROI2.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours3, hierarchy = cv2.findContours(im_ROI3.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            #contoursh, hierarchy = cv2.findContours(im_ROIh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
         # if we don't want to see the gui we don't do that
         # so its more effective
         elif not self.is_show_gui:
@@ -115,10 +125,14 @@ class img_procs:
             contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            #contoursh, hierarchy = cv2.findContours(im_ROIh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Variables to store ALL contour_coordinates
-        contour_no = 0
+        contour_no = -1
         contour_coordinates = []
+
+        # contourh doesn't have a priority list as we just wanna know when we finish going through it
+        contourh_coordinates = []
         contourg_coordinates = []
 
         # List to store INTERESTED contour_coordinates
@@ -127,6 +141,9 @@ class img_procs:
 
         # Loop through each contours
         for j in contours, contours2, contours3:
+            # Variable to notify us which contour we're on (contours, contours2, or contours3)
+            contour_no += 1
+
             for i in j:
                 # Gets the area of each contour
                 area = cv2.contourArea(i)
@@ -147,20 +164,37 @@ class img_procs:
                             # indicating where we found the lines
                             if self.is_show_gui:
                                 cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
+                                cv2.putText(frame, 'Area ROI_' + str(contour_no+1) + " :" + str(area),(10, 25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
 
                             # Store our centroid coordinates
                             contour_coordinates.append(cx)
 
                             # Find contours which are closest to the middle (so PID can be performed)
                             if len(contour_coordinates_priority) >= (contour_no+1):
-                                if abs(MIDDLE-cx) <= abs(MIDDLE-contour_coordinates_priority[contour_no][0]):
+                                if abs(MIDDLE-cx) <= abs(MIDDLE-contour_coordinates_priority[contour_no]):
                                     contour_coordinates_priority[contour_no] = cx
 
                             else:
                                 contour_coordinates_priority.append(cx)
 
-            # Variable to notify us which contour we're on (contours, contours2, or contours3)
-        	contour_no += 1
+        '''
+        # Horizontal line above green box
+        for i in contoursh:
+            area = cv2.contourArea(i)
+            moments = cv2.moments(i)
+
+            if area > ROIh_AREA_THRESH:
+                if moments['m00'] != 0.0:
+                    if moments['m01'] != 0.0:
+                        cx = int(moments['m10']/moments['m00'])
+                        cy = int(moments['m01']/moments['m00'])
+
+                        if self.is_show_gui:
+                            cv2.circle(frame, (cx, cy+ROIh_Y), 4, RED_COLOR, -1)
+                            cv2.putText(frame,'Area ROIh :' + str(area),(10, 140), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
+
+                        contourh_coordinates.append(cx)'''
+
 
         # Green filter
         for i in contoursg:
@@ -177,7 +211,8 @@ class img_procs:
                         # needa indicate where we found
                         # the green box
                         if self.is_show_gui:
-                            cv2.circle(frame, (cx, cy+ROIg_Y), 4, BLUE_COLOR, -1)
+                            cv2.circle(frame, (cx, cy+ROIg_Y), 4, GREEN_COLOR, -1)
+                            cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
 
                         contourg_coordinates.append(cx)
 
@@ -201,7 +236,7 @@ class img_procs:
         # Draw interested contour coordinates
         i = 0
         PID_TOTAL = 0
-        if len(contourg_coordinates_priority) == 0:
+        if len(contourg_coordinates_priority) == 0:# and len(contourh_coordinates) == 0:
             for c in contour_coordinates_priority:
                 # Update PID code here
                 ERROR = MIDDLE-c # Gets error between target value and actual value
@@ -298,6 +333,13 @@ class img_procs:
 
                 elif self.img_enum == 4:
                     cv2.imshow('pi camera', im_ROIg)
+
+                elif self.img_enum == 5:
+                    cv2.imshow('pi camera', im_ROIh)
+
+                elif self.img_enum == 6:
+                    cv2.imshow('pi camera', cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+
 
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
