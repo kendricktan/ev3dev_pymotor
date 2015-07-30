@@ -135,7 +135,7 @@ def translate(raw_str):
             except:
                 pass
 
-        elif 'green_at_left' in _str[0]
+        elif 'green_at_left' in _str[0]:
             try:
                 # Stops motor and sets RPS
                 for motor in motors:
