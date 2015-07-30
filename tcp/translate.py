@@ -71,8 +71,8 @@ def translate(raw_str):
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
 
-                    # Allows motors to finish executing command before continuing
-                    time.sleep(1.85)
+                # Allows motors to finish executing command before continuing
+                time.sleep(1.85)
 
             except:
                 pass

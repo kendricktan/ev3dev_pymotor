@@ -78,17 +78,27 @@ while True:
     # If we're moved towards the end of a greenbox we'll shout a special command
     if pi_img_procs.get_is_greenbox():
 
+        client.send('set_rps(0.75)')
+        client.send('run_to_rel_pos(100)')
+        print 'run to rel pos'
+        print pi_img_procs.get_greenbox_location()
+        time.sleep(0.5)
+
         if 'left' in pi_img_procs.get_greenbox_location():
             client.send('anticlockwise_90')
+            print 'anticlockwise_90'
+
         elif 'right' in pi_img_procs.get_greenbox_location():
             client.send('clockwise_90')
+            print 'clockwise_90'
 
         # Resets boolean var that indicates
         # We've found the greenbox
         pi_img_procs.reset_green_hzone()
+        pi_img_procs.reset_PID() # resets PID as well
 
         # Wait till command finishes executing
-        time.sleep(5)
+        time.sleep(4)
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())

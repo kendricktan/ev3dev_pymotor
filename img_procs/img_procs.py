@@ -342,8 +342,8 @@ class img_procs:
 
     # Resets horizontal and green zone detected values
     def reset_green_hzone(self):
-        self.set_is_prev_hzone_detected(False)
-        self.set_is_prev_green_detected(False)
+        self.is_prev_hzone_detected = False
+        self.is_prev_green_detected =False
 
     # Setters
     # Setter for previously detected huge horizontal area
@@ -363,7 +363,7 @@ class img_procs:
 
     # Confirmation that we've reached the end of a green box
     def get_is_greenbox(self):
-        return (self.get_is_prev_hzone_detected() and self.get_is_prev_green_detected())
+        return (self.is_prev_hzone_detected and self.is_prev_green_detected)
 
     def get_greenbox_location(self):
         return self.greenbox_location
