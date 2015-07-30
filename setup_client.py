@@ -74,7 +74,7 @@ while True:
 
     # Updates camera feed
     pi_img_procs.update()
-
+    '''
     # If we're moved towards the end of a greenbox we'll shout a special command
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location
@@ -108,6 +108,7 @@ while True:
         # Resets boolean var that indicates
         # We've found the greenbox
         pi_img_procs.reset_PID() # resets PID as well
+    '''
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())

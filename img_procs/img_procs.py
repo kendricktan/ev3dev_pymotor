@@ -35,11 +35,6 @@ class img_procs:
         # Has it previously detected a green box
         self.is_prev_green_detected = False
 
-        # Has it previously detected a huge horizontal line
-        # (Most likely to be above the green box)
-        # Used to rotate robot to the direction of the green box
-        self.is_prev_hzone_detected = False
-
 
     # Does it show the GUI for img processing
     def show_gui(self, is_show):
@@ -135,9 +130,6 @@ class img_procs:
         contour_coordinates_priority = []
         contourg_coordinates_priority = []
 
-        # Resets value for horizontal line
-        self.is_prev_hzone_detected = False
-
         # Loop through each contours
         for j in contours, contours2, contours3:
             # Variable to notify us which contour we're on (contours, contours2, or contours3)
@@ -179,9 +171,6 @@ class img_procs:
                             # Check to see if its a horizontal line
                             if area > ROIh_AREA_THRESH:
                                 contourh_coordinates.append(cx)
-
-                                # We have detected a huge horizontal zone
-                                self.is_prev_hzone_detected = True
 
                                 if self.is_show_gui:
                                     cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
@@ -269,10 +258,6 @@ class img_procs:
         R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
         L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
-        if self.is_prev_green_detected:
-            R_MOTOR_RPS = MOTOR_RPS/3
-            L_MOTOR_RPS = MOTOR_RPS/3
-
         # Only want 2 decimal places
         self.rmotor_value = R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
         self.lmotor_value = L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
@@ -337,7 +322,7 @@ class img_procs:
 
     # Confirmation that we've reached the end of a green box
     def get_is_greenbox(self):
-        return (self.is_prev_hzone_detected and self.is_prev_green_detected)
+        return self.is_prev_green_detected
 
     def get_greenbox_location(self):
         # Gets global variables from settings.py
