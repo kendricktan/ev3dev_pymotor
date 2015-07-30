@@ -60,6 +60,9 @@ class img_procs:
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
         ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
 
+        # Convert to HSV for more accurate reading
+        ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
+
         # Green filter
         for (lower, upper) in GREEN_RANGE:
             # Create numpy arrays from boundaries
@@ -330,6 +333,9 @@ class img_procs:
 
         # Gets feed from camera
         ret, frame = self.cap.read()
+
+        # Convert to HSV for more accurate reading
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
