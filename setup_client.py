@@ -80,23 +80,17 @@ while True:
         # Gets greenbox location
         greenbox_location = pi_img_procs.get_greenbox_location()
 
-        # Stops and sets pi RPS
-        client.send('stop')
-        client.send('set_rps(0.75)')
-        time.sleep(0.01)
-        client.send('run_to_rel_pos(100)')
-
-        print greenbox_location
-
         if 'left' in greenbox_location:
-            client.send('right run_to_rel_pos(400)')
+            client.send('green_at_left')
 
         elif 'right' in greenbox_location:
-            client.send('left run_to_rel_pos(400)')
+            client.send('green_at_right')
 
         print 'sleeping...'
         time.sleep(5)
         print 'sleep ended'
+
+        pi_img_procs.reset_greenbox
 
         # Resets PID values so it doesn't
         # confuse the algorithm with sudden

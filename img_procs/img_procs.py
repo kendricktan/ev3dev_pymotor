@@ -327,6 +327,9 @@ class img_procs:
     def get_is_greenbox(self):
         return self.is_prev_green_detected
 
+    def reset_greenbox(self):
+        self.is_prev_green_detected = False
+
     def get_greenbox_location(self):
         # Gets global variables from settings.py
         global GREEN_RANGE, GREEN_THRESH, MIDDLE, GREEN_AREA_MIN, GREEN_AREA_MAX

@@ -106,10 +106,10 @@ def translate(raw_str):
                 # Move just slightly up
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(180)
+                        motors[motor].run_to_rel_pos(220)
 
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(180)
+                        motors[motor].run_to_rel_pos(220)
 
                 time.sleep(1.25)
 
@@ -122,8 +122,60 @@ def translate(raw_str):
 
                 time.sleep(2.5)
 
+                # Walk a bit ahead so it doesn't detect lines
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(100)
+
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(100)
+
+                time.sleep(1.25)
+
             except:
                 pass
+
+        elif 'green_at_left' in _str[0]
+            try:
+                # Stops motor and sets RPS
+                for motor in motors:
+                    motors[motor].stop()
+                    motors[motor].set_rps(0.75)
+
+                time.sleep(0.5)
+
+                # Move just slightly up
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(220)
+
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(220)
+
+                time.sleep(1.25)
+
+                # Rotate 90 degrees anticlockwise
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+
+                time.sleep(2.5)
+
+                # Walk a bit ahead so it doesn't detect lines
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(100)
+
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(100)
+
+                time.sleep(1.25)
+
+            except:
+                pass
+
 
         # Phase for avoiding object detected by ultrasonic sensor
         # Assuming object is around the standard dimensions of 1.x litre bottle
