@@ -36,7 +36,7 @@ ROI_DIF = abs(ROI2_Y-ROI_Y)
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 75 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 85 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 1000
 
 # Settings for horizontal line alignment
@@ -48,13 +48,13 @@ H_ALIGN_THRES = 3 # How many coordinates can the horizontal line be off by from 
 # Green filter thresholding
 ROIg_Y = CAMERA_HEIGHT-90
 
-ROIh_AREA_THRESH = 10000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
+ROIh_AREA_THRESH = 5000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([105, 140, 80], [135, 160, 110])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
+GREEN_RANGE = [([70, 110, 70], [135, 160, 110])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
-GREEN_AREA_MIN = 1000 # Area of contour before officially recognizing it
-GREEN_THRESH = 100#THRESH # Change to higher if can't detect line; change to lower if detects too many
+GREEN_AREA_MIN = 400 # Area of contour before officially recognizing it
+GREEN_THRESH = 75 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
 
 # COLORS (BGR)

@@ -164,9 +164,14 @@ class img_procs:
 
                             else:
                                 contour_coordinates_priority.append(cx)
-                                
+
+                            # Check to see if its a horizontal line
                             if area > ROIh_AREA_THRESH:
                                 contourh_coordinates.append(cx)
+
+                                if self.is_show_gui:
+                                    cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
+                                    cv2.putText(frame, 'Area ROI_h: ' + str(area), (10, 195), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
 
         # Green filter
         for i in contoursg:
@@ -184,7 +189,7 @@ class img_procs:
                         # the green box
                         if self.is_show_gui:
                             cv2.circle(frame, (cx, cy+ROIg_Y), 4, GREEN_COLOR, -1)
-                            cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
+                            cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (0,255,0),2)
 
                         contourg_coordinates.append(cx)
 
@@ -207,7 +212,7 @@ class img_procs:
 
         i = 0
         PID_TOTAL = 0
-        
+
         # PID for green filter
         if len(contourg_coordinates_priority) != 0 or (len(contourh_coordinates) != 0 and len(contourg_coordinates_priority) != 0):
             for c in contourg_coordinates_priority:
@@ -225,7 +230,7 @@ class img_procs:
             D_VAL = 0
             DERIVATOR = 0
             I_VAL = 0
-            
+
         # PID for line following
         else:
             for c in contour_coordinates_priority:
