@@ -74,27 +74,18 @@ while True:
 
     # Updates camera feed
     pi_img_procs.update()
-    '''
-    # If we're moved towards the end of a greenbox we'll shout a special command
+
+
+    # Does it detect a greenbox
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location
         greenbox_location = pi_img_procs.get_greenbox_location()
 
+        # Stops and sets pi RPS
         client.send('stop')
         client.send('set_rps(0.75)')
 
-        print pi_img_procs.get_greenbox_location()
-
-        # If unknown then keep recalibrating until gets 'left' or 'right'
-        while 'unknown' in greenbox_location:
-            client.send('run_to_rel_pos(-10)')
-            time.sleep(1)
-            greenbox_location = pi_img_procs.get_greenbox_location()
-
-        client.send('stop')
-        client.send('set_rps(0.75)')
-        client.send('run_to_rel_pos(100)')
-        time.sleep(0.5)
+        print greenbox_location
 
         if 'left' in greenbox_location:
             client.send('right run_to_rel_pos(400)')
@@ -102,13 +93,26 @@ while True:
         elif 'right' in greenbox_location:
             client.send('left run_to_rel_pos(400)')
 
+        else:
+            # If unknown then keep recalibrating until gets 'left' or 'right'
+            while 'unknown' in greenbox_location:
+                client.send('run_to_rel_pos(-10)')
+                time.sleep(0.5)
+                greenbox_location = pi_img_procs.get_greenbox_location()
+
+                client.send('stop')
+                client.send('set_rps(0.75)')
+                client.send('run_to_rel_pos(360)')
+                time.sleep(1.5)
+
+
         time.sleep(5)
         client.send('stop')
 
-        # Resets boolean var that indicates
-        # We've found the greenbox
-        pi_img_procs.reset_PID() # resets PID as well
-    '''
+        # Resets PID values so it doesn't
+        # confuse the algorithm with sudden
+        # changes
+        pi_img_procs.reset_PID()
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())
