@@ -72,9 +72,6 @@ while True:
                 # Just for safety
                 time.sleep(1.0)
 
-    # Updates camera feed
-    pi_img_procs.update()
-
     # Does it detect a greenbox
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location
@@ -86,16 +83,23 @@ while True:
         elif 'right' in greenbox_location:
             client.send('green_at_right')
 
-        print 'sleeping...'
         time.sleep(5)
-        print 'sleep ended'
 
-        pi_img_procs.reset_greenbox
+        # Resets greenbox value
+        pi_img_procs.reset_greenbox()
 
         # Resets PID values so it doesn't
         # confuse the algorithm with sudden
         # changes
         pi_img_procs.reset_PID()
+
+        # Updates camera feed so it doesn't use outdated feed
+        # (Blame it on pi's processing power
+        for x in range(0, 20):
+            pi_img_procs.update()
+
+    # Updates camera feed
+    pi_img_procs.update()
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())

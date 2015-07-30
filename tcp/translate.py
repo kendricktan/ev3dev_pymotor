@@ -120,16 +120,6 @@ def translate(raw_str):
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
 
-                time.sleep(2.5)
-
-                # Walk a bit ahead so it doesn't detect lines
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(100)
-
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(100)
-
                 time.sleep(1.25)
 
             except:
@@ -161,15 +151,6 @@ def translate(raw_str):
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
 
-                time.sleep(2.5)
-
-                # Walk a bit ahead so it doesn't detect lines
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(100)
-
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(100)
 
                 time.sleep(1.25)
 
