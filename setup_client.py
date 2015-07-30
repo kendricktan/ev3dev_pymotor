@@ -41,6 +41,7 @@ while True:
 
         start_time = time.time()
 
+        # If we detect some object nearby ....
         if obj_dist <= US_START_DIST:
             while obj_dist > US_MIN_DIST and obj_dist <= US_START_DIST:
                 pi_img_procs.update()
@@ -73,6 +74,21 @@ while True:
 
     # Updates camera feed
     pi_img_procs.update()
+
+    # If we're moved towards the end of a greenbox we'll shout a special command
+    if pi_img_procs.get_is_greenbox():
+
+        if 'left' in pi_img_procs.get_greenbox_location():
+            client.send('anticlockwise_90')
+        elif 'right' in pi_img_procs.get_greenbox_location():
+            client.send('clockwise_90')
+
+        # Resets boolean var that indicates
+        # We've found the greenbox
+        pi_img_procs.reset_green_hzone()
+
+        # Wait till command finishes executing
+        time.sleep(5)
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())

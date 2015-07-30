@@ -26,11 +26,22 @@ class img_procs:
         self.is_show_gui = False
 
         # Which img to show (if shows GUI)
-        # 0 = frame, 1 = ROI, 2 = ROI2, 3 = ROI3, 4 = ROIg
+        # 0 = frame, 1 = ROI, 2 = ROI2, 3 = ROI3, 4 = ROIg, 5 = Grayscale img
         self.img_enum = 0
 
         # Does it print the commands of each motor
         self.is_print_cmd = True
+
+        # Has it previously detected a green box
+        self.is_prev_green_detected = False
+
+        # Green box location relative to us
+        self.greenbox_location = 'unknown'
+
+        # Has it previously detected a huge horizontal line
+        # (Most likely to be above the green box)
+        # Used to rotate robot to the direction of the green box
+        self.is_prev_hzone_detected = False
 
 
     # Does it show the GUI for img processing
@@ -169,6 +180,9 @@ class img_procs:
                             if area > ROIh_AREA_THRESH:
                                 contourh_coordinates.append(cx)
 
+                                # We have detected a huge horizontal zone
+                                self.is_prev_hzone_detected = True
+
                                 if self.is_show_gui:
                                     cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
                                     cv2.putText(frame, 'Area ROI_h: ' + str(area), (10, 195), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
@@ -202,8 +216,17 @@ class img_procs:
                                 # We only care about the x coordinates
                                 contourg_coordinates_priority[0] = cx
 
+                                # Is green box right or left relative to our position?
+                                if contourg_coordinates_priority[0] >= MIDDLE:
+                                    self.greenbox_location = 'right'
+                                else:
+                                    self.greenbox_location = 'left'
+
                         else:
                             contourg_coordinates_priority.append(cx)
+
+                        # We have detected a green box
+                        self.is_prev_green_detected = True
 
             # If area is greater than GREEN_AREA_MAX
             # probs at the end already (all green)
@@ -213,53 +236,35 @@ class img_procs:
         i = 0
         PID_TOTAL = 0
 
-        # PID for green filter
-        if len(contourg_coordinates_priority) != 0 or (len(contourh_coordinates) != 0 and len(contourg_coordinates_priority) != 0):
-            for c in contourg_coordinates_priority:
-                ERROR = MIDDLE-c
-                # Proportional should be enough for green
-                P_VAL = KP*ERROR
-
-                PID_VAL = P_VAL
-
-                PID_TOTAL += PID_VAL*GREEN_P_VAL
-
-            # Refreshes PID to prevent random movement
-            ERROR = 0
-            P_VAL = 0
-            D_VAL = 0
-            DERIVATOR = 0
-            I_VAL = 0
 
         # PID for line following
-        else:
-            for c in contour_coordinates_priority:
-                # Update PID code here
-                ERROR = MIDDLE-c # Gets error between target value and actual value
-                P_VAL = KP*ERROR # Gets proportional val
-                D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
-                DERIVATOR = ERROR
+        for c in contour_coordinates_priority:
+            # Update PID code here
+            ERROR = MIDDLE-c # Gets error between target value and actual value
+            P_VAL = KP*ERROR # Gets proportional val
+            D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
+            DERIVATOR = ERROR
 
-                # Calculate integral of error
-                I_VAL = I_VAL + ERROR
+            # Calculate integral of error
+            I_VAL = I_VAL + ERROR
 
-                if I_VAL > I_MAX:
-                    I_VAL = I_MAX
-                elif I_VAL < I_MIN:
-                    I_VAL = I_MIN
+            if I_VAL > I_MAX:
+                I_VAL = I_MAX
+            elif I_VAL < I_MIN:
+                I_VAL = I_MIN
 
-                #  Calculate total PID value here
-                PID_VAL = P_VAL + D_VAL + I_VAL
+            #  Calculate total PID value here
+            PID_VAL = P_VAL + D_VAL + I_VAL
 
-                # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
-                PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
-                # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
+            # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
+            PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
+            # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
 
-                # Since we have 3 different readings at three different locations
-                # we give each reading a different weighting
-                # the further it is the smaller affect it will have on the PID value
-                # i is used to determine the weighting of each contour found
-                i = i + 1
+            # Since we have 3 different readings at three different locations
+            # we give each reading a different weighting
+            # the further it is the smaller affect it will have on the PID value
+            # i is used to determine the weighting of each contour found
+            i = i + 1
 
         # Calculate motor rotation per second
         R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
@@ -267,6 +272,11 @@ class img_procs:
 
         R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
         L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
+
+        # If it detects green we want it to go slowly
+        if self.get_is_prev_green_detected():
+            R_MOTOR_RPS = R_MOTOR_RPS/3
+            L_MOTOR_RPS = L_MOTOR_RPS/3
 
         # Only want 2 decimal places
         self.rmotor_value = R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
@@ -318,118 +328,6 @@ class img_procs:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
 
-    # Aligns robot with a horizontal (black) line
-    # Is behind states if the line is behind robot or not
-    def align_horizontal_line(self, is_behind):
-        global H_ALIGN_THRES, CAMERA_WIDTH, CAMERA_HEIGHT, H_MIDDLE, ROIh_X, ROIh_HEIGHT, THRESH, AREA_THRESH
-
-        # Gets frame from capture device
-        ret, frame = self.cap.read()
-
-        # Define our regions of interest
-        ROI_LEFT = frame [CAMERA_HEIGHT-ROIh_HEIGHT:CAMERA_HEIGHT, 0:H_MIDDLE]
-        ROI_RIGHT = frame [CAMERA_HEIGHT-ROIh_HEIGHT:CAMERA_HEIGHT, H_MIDDLE:CAMERA_WIDTH]
-
-        # Converts ROI into Grayscale
-        im_ROI_LEFT = cv2.cvtColor(ROI_LEFT, cv2.COLOR_BGR2GRAY)
-        im_ROI_RIGHT = cv2.cvtColor(ROI_RIGHT, cv2.COLOR_BGR2GRAY)
-
-        # Apply THRESHold filter to smoothen edges and convert images to negative
-        ret, im_ROI_LEFT = cv2.threshold(im_ROI_LEFT, THRESH, 255, 0)
-        cv2.bitwise_not(im_ROI_LEFT, im_ROI_LEFT)
-
-        ret, im_ROI_RIGHT = cv2.threshold(im_ROI_RIGHT, THRESH, 255, 0)
-        cv2.bitwise_not(im_ROI_RIGHT, im_ROI_RIGHT)
-
-        # Reduces noise in image and dilate to increase white region (since its negative)
-        erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
-        dilate_e = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5));
-
-        cv2.erode(im_ROI_LEFT, erode_e)
-        cv2.dilate(im_ROI_LEFT, dilate_e)
-
-        cv2.erode(im_ROI_RIGHT, erode_e)
-        cv2.dilate(im_ROI_RIGHT, dilate_e)
-
-        # Find contours
-        contours_left, hierarchy = cv2.findContours(im_ROI_LEFT,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        contours_right, hierarchy = cv2.findContours(im_ROI_RIGHT,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-
-        # Dictionary to store our coordinates
-        blackline_found = {}
-        blackline_found['left'] = False
-        blackline_found['right'] = False
-
-        # Loops through each contour
-        for i in contours_left:
-            # Gets the area of each contour
-            area = cv2.contourArea(i)
-
-            # Get dictionary keys for moments
-            moments = cv2.moments (i)
-
-            # We only want to get an area of > the threshold to prevent not usable contours
-            if area>AREA_THRESH:
-                if moments['m00']!=0.0:
-                    if moments['m01']!=0.0:
-                        # We can calculate the centroid coordinates using this
-                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
-                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
-
-                        # We only care if there is a region of black within the line
-                        # And we therefore know if we need to continue moving or not
-
-                        # If its within the allow threshold limit
-                        if abs(cy+(CAMERA_HEIGHT-ROIh_HEIGHT)-(CAMERA_HEIGHT-ROIh_HEIGHT+(ROIh_HEIGHT/2))) <= H_ALIGN_THRES:
-                            blackline_found['left'] = True
-                        break
-
-        # Loops through each contour
-        for i in contours_right:
-            # Gets the area of each contour
-            area = cv2.contourArea(i)
-
-            # Get dictionary keys for moments
-            moments = cv2.moments (i)
-
-            # We only want to get an area of > the threshold to prevent not usable contours
-            if area>AREA_THRESH:
-                if moments['m00']!=0.0:
-                    if moments['m01']!=0.0:
-                        # We can calculate the centroid coordinates using this
-                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
-                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
-
-                        # We only care if there is a region of black within the line
-                        # And we therefore know if we need to continue moving or not
-                        if abs(cy+(CAMERA_HEIGHT-ROIh_HEIGHT)-(CAMERA_HEIGHT-ROIh_HEIGHT+(ROIh_HEIGHT/2))) <= H_ALIGN_THRES:
-
-                            blackline_found['right'] = True
-                        break
-
-        # Out const rps
-        const_rps = 0.5
-
-        if is_behind:
-            const_rps = -0.5
-
-        # If it doesn't detect a black line on left
-        # Continue moving backwards/forwards depending
-        # on parameter
-        if not blackline_found['left']:
-            self.lmotor_cmd = 'left change_rps('+str(const_rps)+')'
-        elif blackline_found['left']:
-            self.lmotor_cmd = 'left stop'
-
-        # Same thing for right
-        if not blackline_found['right']:
-            self.rmotor_cmd = 'right change_rps('+str(const_rps)+')'
-        elif blackline_found['right']:
-            self.rmotor_cmd = 'right stop'
-
-        if blackline_found['right'] and blackline_found['left']:
-            self.is_aligned_hori = True
-
     def show_which_img(self, enum_var):
         self.img_enum = enum_var
 
@@ -442,11 +340,33 @@ class img_procs:
         DERIVATOR = 0
         I_VAL = 0
 
-    def set_is_aligned_hori(self, is_aligned):
-        self.is_aligned_hori = is_aligned
+    # Resets horizontal and green zone detected values
+    def reset_green_hzone(self):
+        self.set_is_prev_hzone_detected(False)
+        self.set_is_prev_green_detected(False)
 
-    def is_aligned_hori(self):
-        return self.is_aligned_hori
+    # Setters
+    # Setter for previously detected huge horizontal area
+    def set_is_prev_hzone_detected(self, is_detected):
+        self.is_prev_hzone_detected = is_detected
+
+    # Setter for previously detected green area
+    def set_is_prev_green_detected(self, is_detected):
+        self.is_prev_green_detected = is_detected
+
+    # Getters
+    def get_is_prev_hzone_detected(self, is_detected):
+        return self.is_prev_hzone_detected
+
+    def get_is_prev_green_detected(self):
+        return self.is_prev_green_detected
+
+    # Confirmation that we've reached the end of a green box
+    def get_is_greenbox(self):
+        return (self.get_is_prev_hzone_detected() and self.get_is_prev_green_detected())
+
+    def get_greenbox_location(self):
+        return self.greenbox_location
 
     def get_rmotor_value(self):
         return self.rmotor_value
