@@ -22,7 +22,7 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 pi_img_procs = img_procs()
 
 # comment if you want to print the commands
-pi_img_procs.print_cmd(True)
+pi_img_procs.print_cmd(False)
 
 # uncomment if you want to show gui
 #pi_img_procs.show_gui(True)
@@ -77,31 +77,38 @@ while True:
 
     # If we're moved towards the end of a greenbox we'll shout a special command
     if pi_img_procs.get_is_greenbox():
+        # Gets greenbox location
+        greenbox_location = pi_img_procs.get_greenbox_location()
 
+        client.send('stop')
+        client.send('set_rps(0.75)')
+
+        print pi_img_procs.get_greenbox_location()
+
+        # If unknown then keep recalibrating until gets 'left' or 'right'
+        while 'unknown' in greenbox_location:
+            client.send('run_to_rel_pos(-10)')
+            time.sleep(1)
+            greenbox_location = pi_img_procs.get_greenbox_location()
+
+        client.send('stop')
         client.send('set_rps(0.75)')
         client.send('run_to_rel_pos(100)')
-        print 'run to rel pos'
-        print pi_img_procs.get_greenbox_location()
         time.sleep(0.5)
 
-        if 'left' in pi_img_procs.get_greenbox_location():
-            client.send('anticlockwise_90')
-            print 'anticlockwise_90'
+        if 'left' in greenbox_location:
+            client.send('right run_to_rel_pos(400)')
 
-        elif 'right' in pi_img_procs.get_greenbox_location():
-            client.send('clockwise_90')
-            print 'clockwise_90'
+        elif 'right' in greenbox_location:
+            client.send('left run_to_rel_pos(400)')
+
+        time.sleep(5)
+        client.send('stop')
 
         # Resets boolean var that indicates
         # We've found the greenbox
-        pi_img_procs.reset_green_hzone()
         pi_img_procs.reset_PID() # resets PID as well
-
-        # Wait till command finishes executing
-        time.sleep(4)
 
     # Rotates motor according to camera feed
     client.send(pi_img_procs.get_rmotor_cmd())
     client.send(pi_img_procs.get_lmotor_cmd())
-
-    time.sleep(0.01)

@@ -35,9 +35,6 @@ class img_procs:
         # Has it previously detected a green box
         self.is_prev_green_detected = False
 
-        # Green box location relative to us
-        self.greenbox_location = 'unknown'
-
         # Has it previously detected a huge horizontal line
         # (Most likely to be above the green box)
         # Used to rotate robot to the direction of the green box
@@ -138,6 +135,9 @@ class img_procs:
         contour_coordinates_priority = []
         contourg_coordinates_priority = []
 
+        # Resets value for horizontal line
+        self.is_prev_hzone_detected = False
+
         # Loop through each contours
         for j in contours, contours2, contours3:
             # Variable to notify us which contour we're on (contours, contours2, or contours3)
@@ -187,6 +187,9 @@ class img_procs:
                                     cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
                                     cv2.putText(frame, 'Area ROI_h: ' + str(area), (10, 195), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
 
+        # Resets greenbox location
+        self.is_prev_green_detected = False
+
         # Green filter
         for i in contoursg:
             area = cv2.contourArea(i)
@@ -216,12 +219,6 @@ class img_procs:
                                 # We only care about the x coordinates
                                 contourg_coordinates_priority[0] = cx
 
-                                # Is green box right or left relative to our position?
-                                if contourg_coordinates_priority[0] >= MIDDLE:
-                                    self.greenbox_location = 'right'
-                                else:
-                                    self.greenbox_location = 'left'
-
                         else:
                             contourg_coordinates_priority.append(cx)
 
@@ -235,7 +232,6 @@ class img_procs:
 
         i = 0
         PID_TOTAL = 0
-
 
         # PID for line following
         for c in contour_coordinates_priority:
@@ -273,10 +269,9 @@ class img_procs:
         R_MOTOR_RPS = MOTOR_RPS_MIN if R_MOTOR_RPS < MOTOR_RPS_MIN else R_MOTOR_RPS
         L_MOTOR_RPS = MOTOR_RPS_MIN if L_MOTOR_RPS < MOTOR_RPS_MIN else L_MOTOR_RPS
 
-        # If it detects green we want it to go slowly
-        if self.get_is_prev_green_detected():
-            R_MOTOR_RPS = R_MOTOR_RPS/3
-            L_MOTOR_RPS = L_MOTOR_RPS/3
+        if self.is_prev_green_detected:
+            R_MOTOR_RPS = MOTOR_RPS/3
+            L_MOTOR_RPS = MOTOR_RPS/3
 
         # Only want 2 decimal places
         self.rmotor_value = R_MOTOR_RPS = math.ceil(R_MOTOR_RPS * 100) / 100.0
@@ -340,33 +335,62 @@ class img_procs:
         DERIVATOR = 0
         I_VAL = 0
 
-    # Resets horizontal and green zone detected values
-    def reset_green_hzone(self):
-        self.is_prev_hzone_detected = False
-        self.is_prev_green_detected =False
-
-    # Setters
-    # Setter for previously detected huge horizontal area
-    def set_is_prev_hzone_detected(self, is_detected):
-        self.is_prev_hzone_detected = is_detected
-
-    # Setter for previously detected green area
-    def set_is_prev_green_detected(self, is_detected):
-        self.is_prev_green_detected = is_detected
-
-    # Getters
-    def get_is_prev_hzone_detected(self, is_detected):
-        return self.is_prev_hzone_detected
-
-    def get_is_prev_green_detected(self):
-        return self.is_prev_green_detected
-
     # Confirmation that we've reached the end of a green box
     def get_is_greenbox(self):
         return (self.is_prev_hzone_detected and self.is_prev_green_detected)
 
     def get_greenbox_location(self):
-        return self.greenbox_location
+        # Gets global variables from settings.py
+        global GREEN_RANGE, GREEN_THRESH, MIDDLE, GREEN_AREA_MIN, GREEN_AREA_MAX
+
+        # Gets feed from camera
+        ret, frame = self.cap.read()
+
+        # Green filter
+        for (lower, upper) in GREEN_RANGE:
+            # Create numpy arrays from boundaries
+            lower = np.array(lower, dtype='uint8')
+            upper = np.array(upper, dtype='uint8')
+
+            # Find the colors within the specific boundary and apply mask
+            mask = cv2.inRange(frame, lower, upper)
+            frame = cv2.bitwise_and(frame, frame, mask=mask)
+
+        # Converts ROI into grayscale
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Apply threshold filter to smoothen edges and convert images to negative
+        ret, frame = cv2.threshold(frame, GREEN_THRESH, 255, 0)
+
+        # Find contours
+        contours, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Finds out if greenbox is left or right
+        right = 0
+        left = 0
+
+        for i in contours:
+            area = cv2.contourArea(i)
+
+            moments = cv2.moments(i)
+
+            if area > GREEN_AREA_MIN and area < GREEN_AREA_MAX:
+                if moments['m00'] != 0.0:
+                    if moments['m01'] != 0.0:
+                        cx = int(moments['m10']/moments['m00'])
+                        cy = int(moments['m01']/moments['m00'])
+
+                        if cx > MIDDLE:
+                            right = right + 1
+                        else:
+                            left = left + 1
+
+        if right > left:
+            return 'right'
+        elif left > right:
+            return 'left'
+
+        return 'unknown'
 
     def get_rmotor_value(self):
         return self.rmotor_value

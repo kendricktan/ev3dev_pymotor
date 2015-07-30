@@ -54,7 +54,7 @@ GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([70, 110, 70], [135, 160, 110])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 400 # Area of contour before officially recognizing it
-GREEN_THRESH = 75 #THRESH # Change to lower if can't detect line; change to higher if detects too many
+GREEN_THRESH = 105 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
 
 # COLORS (BGR)
