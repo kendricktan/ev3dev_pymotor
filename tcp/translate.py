@@ -93,7 +93,39 @@ def translate(raw_str):
             except:
                 pass
 
-        # Phase 1 for avoiding object detected by ultrasonic sensor
+        # Command to move towards green blocks
+        elif 'green_at_right' in _str[0]:
+            try:
+                # Stops motor and sets RPS
+                for motor in motors:
+                    motors[motor].stop()
+                    motors[motor].set_rps(0.75)
+
+                time.sleep(0.5)
+
+                # Move just slightly up
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(180)
+
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(180)
+
+                time.sleep(1.25)
+
+                # Rotate 90 degrees clockwise
+                for motor in motors:
+                    if 'left' in motor:
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+                    elif 'right' in motor:
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+
+                time.sleep(2.5)
+
+            except:
+                pass
+
+        # Phase for avoiding object detected by ultrasonic sensor
         # Assuming object is around the standard dimensions of 1.x litre bottle
         elif 'us_avoid_object' in _str[0]:
             try:

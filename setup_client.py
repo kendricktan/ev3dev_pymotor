@@ -75,7 +75,6 @@ while True:
     # Updates camera feed
     pi_img_procs.update()
 
-
     # Does it detect a greenbox
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location
@@ -84,6 +83,8 @@ while True:
         # Stops and sets pi RPS
         client.send('stop')
         client.send('set_rps(0.75)')
+        time.sleep(0.01)
+        client.send('run_to_rel_pos(100)')
 
         print greenbox_location
 
@@ -93,21 +94,9 @@ while True:
         elif 'right' in greenbox_location:
             client.send('left run_to_rel_pos(400)')
 
-        else:
-            # If unknown then keep recalibrating until gets 'left' or 'right'
-            while 'unknown' in greenbox_location:
-                client.send('run_to_rel_pos(-10)')
-                time.sleep(0.5)
-                greenbox_location = pi_img_procs.get_greenbox_location()
-
-                client.send('stop')
-                client.send('set_rps(0.75)')
-                client.send('run_to_rel_pos(360)')
-                time.sleep(1.5)
-
-
+        print 'sleeping...'
         time.sleep(5)
-        client.send('stop')
+        print 'sleep ended'
 
         # Resets PID values so it doesn't
         # confuse the algorithm with sudden
