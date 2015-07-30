@@ -94,9 +94,19 @@ while True:
         pi_img_procs.reset_PID()
 
         # Updates camera feed so it doesn't use outdated feed
-        # (Blame it on pi's processing power
+        # (Blame it on pi's processing power)
         for x in range(0, 20):
             pi_img_procs.update()
+            
+        # Runs slower for the next 5 seconds to allow ample time for calibration
+        green_end_time = time.time()
+        
+        while time.time()-green_end_time <= 5:
+            pi_img_procs.update()
+
+            # We want slower speed now...
+            client.send('right change_rps('+ str(pi_img_procs.get_rmotor_value()/3) +')')
+            client.send('left change_rps('+ str(pi_img_procs.get_lmotor_value()/3) +')')
 
     # Updates camera feed
     pi_img_procs.update()
