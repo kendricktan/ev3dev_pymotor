@@ -3,8 +3,6 @@ import time
 
 # Format: [left|right] [command (i.e run_forever, change_rps(0.5)...]
 def translate(raw_str):
-    global OUTTER_MOTOR_AVOID_RPS, INNER_MOTOR_AVOID_RPS, MOTOR_ROTATION_TO_90_DEGREES
-
     _str = raw_str.split()
 
     # If not specify which motor
@@ -101,24 +99,24 @@ def translate(raw_str):
                     motors[motor].stop()
                     motors[motor].set_rps(0.75)
 
-                time.sleep(0.5)
+                time.sleep(0.25)
 
                 # Move just slightly up
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                 time.sleep(1.25)
 
                 # Rotate 90 degrees clockwise
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
 
                 time.sleep(1.25)
 
@@ -132,7 +130,7 @@ def translate(raw_str):
                     motors[motor].stop()
                     motors[motor].set_rps(0.75)
 
-                time.sleep(0.5)
+                time.sleep(0.25)
 
                 # Move just slightly up
                 for motor in motors:
@@ -147,9 +145,9 @@ def translate(raw_str):
                 # Rotate 90 degrees anticlockwise
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
+                        motors[motor].run_to_rel_pos(-MOTOR_GREEN_FORWARD)
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
 
                 time.sleep(1.25)
