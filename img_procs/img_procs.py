@@ -46,7 +46,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, ROIh_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR, H_BLACK_LINE_THRESH
+        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
@@ -56,7 +56,6 @@ class img_procs:
         ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
         ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
-        #ROIh = frame [ROIh_Y:(ROIg_Y), 0:320] # ROI horizontal (to detect black lines above green lines to aid it in deathtrap)
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -73,7 +72,6 @@ class img_procs:
         im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
         im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
         im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
-        #im_ROIh = cv2.cvtColor(ROIh, cv2.COLOR_BGR2GRAY)
 
         # Apply THRESHold filter to smoothen edges and convert images to negative
         ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
@@ -88,9 +86,6 @@ class img_procs:
         ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
         # Do NOT bitwise_not im_ROIg
 
-        #ret, im_ROIh = cv2.threshold(im_ROIh, H_BLACK_LINE_THRESH, 255, 0)
-        #cv2.bitwise_not(im_ROIh, im_ROIh)
-
         # Reduces noise in image and dilate to increase white region (since its negative)
         erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
         dilate_e = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5));
@@ -104,9 +99,6 @@ class img_procs:
         cv2.erode(im_ROI3, erode_e)
         cv2.dilate(im_ROI3, dilate_e)
 
-        #cv2.erode(im_ROIh, erode_e)
-        #cv2.dilate(im_ROIh, dilate_e)
-
         # Find contours
         # If we wanna show the images, we want to show
         # the UNALTERED (in the process of finding contours) images
@@ -116,7 +108,6 @@ class img_procs:
             contours2, hierarchy = cv2.findContours(im_ROI2.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours3, hierarchy = cv2.findContours(im_ROI3.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            #contoursh, hierarchy = cv2.findContours(im_ROIh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # if we don't want to see the gui we don't do that
         # so its more effective
@@ -125,15 +116,12 @@ class img_procs:
             contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            #contoursh, hierarchy = cv2.findContours(im_ROIh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Variables to store ALL contour_coordinates
         contour_no = -1
         contour_coordinates = []
-
-        # contourh doesn't have a priority list as we just wanna know when we finish going through it
-        contourh_coordinates = []
         contourg_coordinates = []
+        contourh_coordinates = [] # Coordinates to store of detects a black line perpendicular to the black line tracking (meaning that we're reached a green box)
 
         # List to store INTERESTED contour_coordinates
         contour_coordinates_priority = []
@@ -176,25 +164,9 @@ class img_procs:
 
                             else:
                                 contour_coordinates_priority.append(cx)
-
-        '''
-        # Horizontal line above green box
-        for i in contoursh:
-            area = cv2.contourArea(i)
-            moments = cv2.moments(i)
-
-            if area > ROIh_AREA_THRESH:
-                if moments['m00'] != 0.0:
-                    if moments['m01'] != 0.0:
-                        cx = int(moments['m10']/moments['m00'])
-                        cy = int(moments['m01']/moments['m00'])
-
-                        if self.is_show_gui:
-                            cv2.circle(frame, (cx, cy+ROIh_Y), 4, RED_COLOR, -1)
-                            cv2.putText(frame,'Area ROIh :' + str(area),(10, 140), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
-
-                        contourh_coordinates.append(cx)'''
-
+                                
+                            if area > ROIh_AREA_THRESH:
+                                contourh_coordinates.append(cx)
 
         # Green filter
         for i in contoursg:
@@ -233,10 +205,29 @@ class img_procs:
             else:
                 pass
 
-        # Draw interested contour coordinates
         i = 0
         PID_TOTAL = 0
-        if len(contourg_coordinates_priority) == 0:# and len(contourh_coordinates) == 0:
+        
+        # PID for green filter
+        if len(contourg_coordinates_priority) != 0 or (len(contourh_coordinates) != 0 and len(contourg_coordinates_priority) != 0):
+            for c in contourg_coordinates_priority:
+                ERROR = MIDDLE-c
+                # Proportional should be enough for green
+                P_VAL = KP*ERROR
+
+                PID_VAL = P_VAL
+
+                PID_TOTAL += PID_VAL*GREEN_P_VAL
+
+            # Refreshes PID to prevent random movement
+            ERROR = 0
+            P_VAL = 0
+            D_VAL = 0
+            DERIVATOR = 0
+            I_VAL = 0
+            
+        # PID for line following
+        else:
             for c in contour_coordinates_priority:
                 # Update PID code here
                 ERROR = MIDDLE-c # Gets error between target value and actual value
@@ -265,24 +256,6 @@ class img_procs:
                 # i is used to determine the weighting of each contour found
                 i = i + 1
 
-        # PID for green filter
-        else:
-            for c in contourg_coordinates_priority:
-                ERROR = MIDDLE-c
-                # Proportional should be enough for green
-                P_VAL = KP*ERROR
-
-                PID_VAL = P_VAL
-
-                PID_TOTAL += PID_VAL*GREEN_P_VAL
-
-            # Refreshes PID to prevent random movement
-            ERROR = 0
-            P_VAL = 0
-            D_VAL = 0
-            DERIVATOR = 0
-            I_VAL = 0
-
         # Calculate motor rotation per second
         R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
         L_MOTOR_RPS = MOTOR_RPS-PID_TOTAL
@@ -295,7 +268,7 @@ class img_procs:
         self.lmotor_value = L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
         # If it detects line(s) [green or black]
-        if len(contour_coordinates_priority) >= 1 or len(contourg_coordinates_priority) >= 1:
+        if len(contour_coordinates_priority) >= 1:
             # Saves right motor command
             self.rmotor_cmd = 'right change_rps(' + str(R_MOTOR_RPS) + ')'
             if not self.is_show_gui:
@@ -319,28 +292,23 @@ class img_procs:
         # If we wanna see gui
         if self.is_show_gui:
             if frame is not None:
-                if self.img_enum == 0:
+                if self.img_enum == '0':
                     cv2.imshow('pi camera', frame)
 
-                elif self.img_enum == 1:
+                elif self.img_enum == '1':
                     cv2.imshow('pi camera', im_ROI)
 
-                elif self.img_enum == 2:
+                elif self.img_enum == '2':
                     cv2.imshow('pi camera', im_ROI2)
 
-                elif self.img_enum == 3:
+                elif self.img_enum == '3':
                     cv2.imshow('pi camera', im_ROI3)
 
-                elif self.img_enum == 4:
+                elif self.img_enum == '4':
                     cv2.imshow('pi camera', im_ROIg)
 
-                elif self.img_enum == 5:
-                    cv2.imshow('pi camera', im_ROIh)
-
-                elif self.img_enum == 6:
+                elif self.img_enum == '5':
                     cv2.imshow('pi camera', cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
-
-
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()

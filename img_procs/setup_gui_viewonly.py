@@ -11,8 +11,9 @@ pi_img_procs.show_gui(True)
 # ROI = 1
 # ROI2 = 2
 # ROI3 = 3
-# ROI4 = 4
-img_enum = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+# ROIg = 4
+# Grayscale = 5
+img_enum = str(sys.argv[1]) if len(sys.argv) > 1 else str(0)
 pi_img_procs.show_which_img(img_enum)
 
 while True:

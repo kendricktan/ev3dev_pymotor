@@ -46,11 +46,9 @@ ROIh_HEIGHT = 15
 H_ALIGN_THRES = 3 # How many coordinates can the horizontal line be off by from (CAMERA_HEIGHT-ROIh_HEIGHT)+(ROIh_HEIGHT/2)
 
 # Green filter thresholding
-ROIg_Y = 120 # or 120
-ROIh_Y = ROIg_Y-40
-ROIh_AREA_THRESH = 10000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
-H_BLACK_LINE_THRESH = 100 # Change to higher if can't detect; lower if detects too many
+ROIg_Y = CAMERA_HEIGHT-90
 
+ROIh_AREA_THRESH = 10000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
 
 GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([105, 140, 80], [135, 160, 110])] # Increase B(G)R [G] range if detects fuzzy lines, change if can't detect
