@@ -83,7 +83,7 @@ while True:
         elif 'right' in greenbox_location:
             client.send('green_at_right')
 
-        time.sleep(5)
+        time.sleep(3.5)
 
         # Resets greenbox value
         pi_img_procs.reset_greenbox()
