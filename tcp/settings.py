@@ -5,17 +5,12 @@ from resources import *
 MOTOR_ROTATION_TO_90_DEGREES = 215
 
 # Motor RPS for avoiding object
-OUTTER_MOTOR_AVOID_RPS = 0.80
+OUTTER_MOTOR_AVOID_RPS = 0.775 # Decrease to increase circular radius
 INNER_MOTOR_AVOID_RPS = 0.375
 
 # Motor relative rotation to green lines
-<<<<<<< HEAD
-MOTOR_ROTATION_GREEN = 215
-MOTOR_GREEN_FORWARD = 225
-=======
 MOTOR_ROTATION_GREEN = 107
-MOTOR_GREEN_FORWARD = 250
->>>>>>> 480b8932c9436a1aa3e9ff6c689a098a364f3e4e
+MOTOR_GREEN_FORWARD = 225
 
 ### Motor configuration ###
 motors = {}
