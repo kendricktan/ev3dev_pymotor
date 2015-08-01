@@ -46,16 +46,19 @@ ROIh_HEIGHT = 15
 H_ALIGN_THRES = 3 # How many coordinates can the horizontal line be off by from (CAMERA_HEIGHT-ROIh_HEIGHT)+(ROIh_HEIGHT/2)
 
 # Green filter thresholding
-ROIg_Y = ROI_Y-90
+ROIg_Y = CAMERA_HEIGHT-80#ROI_Y-90
 
 ROIh_AREA_THRESH = 5000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([55, 115, 115], [85, 145, 145])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE = [([55, 75, 105], [85, 145, 185])] # HSV, use get_hsv.py to calibrate it
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 400 # Area of contour before officially recognizing it
 GREEN_THRESH = 55 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
+# Used to determine if black line is straight (used for calibration after black line)
+BLACKLINE_MIN_X = CAMERA_WIDTH/2-(CAMERA_WIDTH/6)
+BLACKLINE_MAX_X = CAMERA_WIDTH/2+(CAMERA_WIDTH/6)
 
 # COLORS (BGR)
 RED_COLOR = (43, 57, 192)
