@@ -35,6 +35,10 @@ class img_procs:
         # Has it previously detected a green box
         self.is_prev_green_detected = False
 
+        # Is the black line straight
+        #(Used for calibration after greenbox)
+        self.is_black_line_straight = False
+
 
     # Does it show the GUI for img processing
     def show_gui(self, is_show):
@@ -178,6 +182,18 @@ class img_procs:
                                 if self.is_show_gui:
                                     cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
                                     cv2.putText(frame, 'Area ROI_h: ' + str(area), (10, 195), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
+
+        # Sets is blackline straight boolean var
+        # Used for calibration AFTER green box
+        self.is_black_line_straight = True
+        for x in contour_coordinates_priority:
+            if x < BLACKLINE_MIN_X or x > BLACKLINE_MAX_X:
+                self.is_black_line_straight = False
+
+        if self.is_show_gui:
+            if self.is_black_line_straight:
+                cv2.putText(frame, 'Straight line detected!', (10, 210), cv2.FONT_HERSHEY_PLAIN, 1, (131, 130, 224), 2)
+
 
         # Resets greenbox location
         self.is_prev_green_detected = False
