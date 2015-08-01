@@ -54,7 +54,7 @@ GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([55, 75, 105], [85, 145, 185])] # HSV, use get_hsv.py to calibrate it
 GREEN_AREA_MAX = 35000 # If exceed this, robot has reached the end
 GREEN_AREA_MIN = 400 # Area of contour before officially recognizing it
-GREEN_THRESH = 55 #THRESH # Change to lower if can't detect line; change to higher if detects too many
+GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
 # Used to determine if black line is straight (used for calibration after black line)
 BLACKLINE_MIN_X = CAMERA_WIDTH/2-(CAMERA_WIDTH/6)

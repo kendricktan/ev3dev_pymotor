@@ -62,7 +62,7 @@ class img_procs:
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-        ROIg = frame [ROIg_Y:(ROIg_Y+40), 0:320] # Half the screen for green
+        ROIg = frame [ROIg_Y:(ROIg_Y+50), 0:320] # Half the screen for green
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)

@@ -118,8 +118,6 @@ while True:
             client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
             client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
 
-        for x in range(0, 20):
-            pi_img_procs.update()
 
     # Updates camera feed
     pi_img_procs.update()
