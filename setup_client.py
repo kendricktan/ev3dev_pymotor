@@ -43,12 +43,13 @@ while True:
 
         # If we detect some object nearby ....
         if obj_dist <= US_START_DIST:
+
+            # We want slower speed
             while obj_dist > US_MIN_DIST and obj_dist <= US_START_DIST:
                 pi_img_procs.update()
 
-                # We want slower speed now...
-                client.send('right change_rps('+ str(pi_img_procs.get_rmotor_value()/3) +')')
-                client.send('left change_rps('+ str(pi_img_procs.get_lmotor_value()/3) +')')
+                client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
+                client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
 
                 obj_dist = us_sens01.read()
                 time.sleep(0.01)
@@ -83,7 +84,7 @@ while True:
         elif 'right' in greenbox_location:
             client.send('green_at_right')
 
-        time.sleep(2.85)
+        time.sleep(1.85)
 
         # Resets greenbox value
         pi_img_procs.reset_greenbox()
@@ -101,22 +102,24 @@ while True:
         time.sleep(0.25)
 
         # Keeps moving slowly until it finds a straight black line
-        client.send('run-forever')
+        client.send('run_forever')
+
+        time.sleep(0.1)
+        while not pi_img_procs.get_is_black_line_straight():
+            pi_img_procs.update()
 
         # Runs slower for the next 5 seconds to allow ample time for calibration
         green_end_time = time.time()
 
-        while time.time()-green_end_time <= 1:
+        # Make it run at a lower speed
+        while time.time()-green_end_time <= 0.5:
             pi_img_procs.update()
 
-            # We want slower speed now...
-            client.send('right change_rps('+ str(pi_img_procs.get_rmotor_value()/3) +')')
-            client.send('left change_rps('+ str(pi_img_procs.get_lmotor_value()/3) +')')
+            client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
+            client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
 
         for x in range(0, 20):
             pi_img_procs.update()
-
-        print 'end green'
 
     # Updates camera feed
     pi_img_procs.update()

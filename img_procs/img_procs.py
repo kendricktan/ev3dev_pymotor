@@ -62,7 +62,7 @@ class img_procs:
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
         ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-        ROIg = frame [ROIg_Y:(ROIg_Y+80), 0:320] # Half the screen for green
+        ROIg = frame [ROIg_Y:(ROIg_Y+40), 0:320] # Half the screen for green
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
@@ -185,10 +185,13 @@ class img_procs:
 
         # Sets is blackline straight boolean var
         # Used for calibration AFTER green box
-        self.is_black_line_straight = True
-        for x in contour_coordinates_priority:
-            if x < BLACKLINE_MIN_X or x > BLACKLINE_MAX_X:
-                self.is_black_line_straight = False
+        if len(contour_coordinates_priority) >= 1:
+            self.is_black_line_straight = True
+            for x in contour_coordinates_priority:
+                if x < BLACKLINE_MIN_X or x > BLACKLINE_MAX_X:
+                    self.is_black_line_straight = False
+        else:
+            self.is_black_line_straight = False
 
         if self.is_show_gui:
             if self.is_black_line_straight:
@@ -339,6 +342,7 @@ class img_procs:
         DERIVATOR = 0
         I_VAL = 0
 
+    # Calibration for green box
     # Confirmation that we've reached the end of a green box
     def get_is_greenbox(self):
         return self.is_prev_green_detected
@@ -401,6 +405,9 @@ class img_procs:
             return 'left'
 
         return 'unknown'
+
+    def get_is_black_line_straight(self):
+        return self.is_black_line_straight
 
     def get_rmotor_value(self):
         return self.rmotor_value

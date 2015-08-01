@@ -46,7 +46,7 @@ ROIh_HEIGHT = 15
 H_ALIGN_THRES = 3 # How many coordinates can the horizontal line be off by from (CAMERA_HEIGHT-ROIh_HEIGHT)+(ROIh_HEIGHT/2)
 
 # Green filter thresholding
-ROIg_Y = CAMERA_HEIGHT-80#ROI_Y-90
+ROIg_Y = CAMERA_HEIGHT-40#ROI_Y-90
 
 ROIh_AREA_THRESH = 5000 # Area threshold for ROI horizontal (line above green box, usually along x-axis)
 
