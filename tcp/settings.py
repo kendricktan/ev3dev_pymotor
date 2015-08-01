@@ -9,8 +9,8 @@ OUTTER_MOTOR_AVOID_RPS = 0.80
 INNER_MOTOR_AVOID_RPS = 0.375
 
 # Motor relative rotation to green lines
-MOTOR_ROTATION_GREEN = 200
-MOTOR_GREEN_FORWARD = 250
+MOTOR_ROTATION_GREEN = 215
+MOTOR_GREEN_FORWARD = 225
 
 ### Motor configuration ###
 motors = {}
