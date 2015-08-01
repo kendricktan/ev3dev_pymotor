@@ -122,8 +122,12 @@ def translate(raw_str):
 
                 # Stop and set rps
                 for motor in motors:
-                    motors[motor].set_rps(0.25)
                     motors[motor].stop()
+
+                    if 'left' in motor:
+                        motors[motor].set_rps(0.25)
+                    elif 'right' in motor:
+                        motors[motor].set_rps(-0.25)
 
             except:
                 pass
@@ -160,7 +164,11 @@ def translate(raw_str):
                 # Stop and set low rps
                 for motor in motors:
                     motors[motor].stop()
-                    motors[motor].set_rps(0.25)
+
+                    if 'left' in motor:
+                        motors[motor].set_rps(-0.25)
+                    elif 'right' in motor:
+                        motors[motor].set_rps(0.25)
 
             except:
                 pass
