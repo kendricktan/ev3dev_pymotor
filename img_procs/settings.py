@@ -3,9 +3,9 @@ CAMERA_WIDTH = 320
 CAMERA_HEIGHT = 240
 
 # PID
-KP = 0.0185
-KI = 0.0075
-KD = 0.011
+KP = 0.0065
+KI = 0.0055
+KD = 0.008
 DERIVATOR = 0
 
 P_VAL = 0
@@ -20,7 +20,7 @@ PID_TOTAL = 0
 ERROR = 0
 
 # Motor speed
-MOTOR_RPS = 0.75 # rotations per scond
+MOTOR_RPS = 0.65 # rotations per scond
 MOTOR_RPS_MIN = -2.0
 # If line is on the right = negative value
 
@@ -29,8 +29,8 @@ ROI_Y = 120
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 95 # Change threshold to higher if can't detect line; Change to lower if detects too many
-AREA_THRESH = 1000 # Minimum area before it's considered to be a black line
+THRESH = 75 # Change threshold to higher if can't detect line; Change to lower if detects too many
+AREA_THRESH = 1250 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
 ROIg_Y = CAMERA_HEIGHT-40

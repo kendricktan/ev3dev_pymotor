@@ -16,7 +16,7 @@ from settings import *
 class img_procs:
     def __init__(self):
         global CAMERA_WIDTH, CAMERA_HEIGHT
-    
+
         # Get pi camera stream
         self.cap = cv2.VideoCapture(0)
 
@@ -63,7 +63,7 @@ class img_procs:
         # Define our regions of interest
         # Black line ROI
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
-        
+
         # Greenbox ROI
         ROIg = frame [ROIg_Y:(ROIg_Y+50), 0:320]
 
@@ -146,7 +146,7 @@ class img_procs:
                                 blackline_x_location = cx
 
                         else:
-                            blackline_x_location = cx       
+                            blackline_x_location = cx
 
         # Resets greenbox location
         self.is_prev_green_detected = False
@@ -183,7 +183,7 @@ class img_procs:
 
                         # We have detected a green box
                         self.is_prev_green_detected = True
-                        
+
         # Sets is blackline straight boolean var
         # Used for calibration AFTER green box
         if blackline_x_location != -1:
@@ -218,7 +218,7 @@ class img_procs:
 
         #  Calculate total PID value here
         PID_VAL = P_VAL + D_VAL + I_VAL
-        
+
         PID_TOTAL += PID_VAL
 
         # Calculate motor rotation per second
@@ -265,15 +265,15 @@ class img_procs:
                 elif self.img_enum == '1':
                     cv2.imshow('pi camera', im_ROI)
 
-                # Show green line detection    
+                # Show green line detection
                 elif self.img_enum == '2':
                     cv2.imshow('pi camera', im_ROIg)
 
                 # Show grayscale image
                 elif self.img_enum == '3':
                     cv2.imshow('pi camera', cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
-                
-                # B&W for whole frame    
+
+                # B&W for whole frame
                 elif self.img_enum == '4':
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     ret, frame = cv2.threshold(frame, THRESH, 255, 0)
@@ -281,10 +281,12 @@ class img_procs:
                     cv2.erode(frame, erode_e)
                     cv2.dilate(frame, dilate_e)
                     cv2.imshow('pi camera', frame)
-                    
+
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
+
+        time.sleep(0.01)
 
     def show_which_img(self, enum_var):
         self.img_enum = enum_var
