@@ -15,6 +15,8 @@ from settings import *
 
 class img_procs:
     def __init__(self):
+        global CAMERA_WIDTH, CAMERA_HEIGHT
+    
         # Get pi camera stream
         self.cap = cv2.VideoCapture(0)
 
@@ -26,7 +28,7 @@ class img_procs:
         self.is_show_gui = False
 
         # Which img to show (if shows GUI)
-        # 0 = frame, 1 = ROI, 2 = ROI2, 3 = ROI3, 4 = ROIg, 5 = Grayscale img
+        # 0 = frame, 1 = ROI, 2 = ROIg, 3 = Grayscale img
         self.img_enum = 0
 
         # Does it print the commands of each motor
@@ -53,16 +55,17 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global PID_MULTI_THRES, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, ROI2_Y, ROI3_Y, ROI_START, ROI_DIF, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_AREA_MAX, GREEN_AREA_MIN, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
 
         # Define our regions of interest
+        # Black line ROI
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
-        ROI2 = frame [ROI2_Y:(ROI2_Y+40), 0:320]
-        ROI3 = frame [ROI3_Y:(ROI3_Y+40), 0:320]
-        ROIg = frame [ROIg_Y:(ROIg_Y+50), 0:320] # Half the screen for green
+        
+        # Greenbox ROI
+        ROIg = frame [ROIg_Y:(ROIg_Y+50), 0:320]
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
@@ -77,21 +80,13 @@ class img_procs:
             mask = cv2.inRange(ROIg, lower, upper)
             ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)
 
-        # Converts ROI into Grayscale
+        # Converts ROI's into Grayscale
         im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
-        im_ROI2 = cv2.cvtColor(ROI2, cv2.COLOR_BGR2GRAY)
-        im_ROI3 = cv2.cvtColor(ROI3, cv2.COLOR_BGR2GRAY)
         im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
 
-        # Apply THRESHold filter to smoothen edges and convert images to negative
+        # Apply Threshold filter to smoothen edges and convert images to negative
         ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
         cv2.bitwise_not(im_ROI, im_ROI)
-
-        ret, im_ROI2 = cv2.threshold(im_ROI2, THRESH, 255, 0)
-        cv2.bitwise_not(im_ROI2, im_ROI2)
-
-        ret, im_ROI3 = cv2.threshold(im_ROI3, THRESH, 255, 0)
-        cv2.bitwise_not(im_ROI3, im_ROI3)
 
         ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
         # Do NOT bitwise_not im_ROIg
@@ -103,110 +98,65 @@ class img_procs:
         cv2.erode(im_ROI, erode_e)
         cv2.dilate(im_ROI, dilate_e)
 
-        cv2.erode(im_ROI2, erode_e)
-        cv2.dilate(im_ROI2, dilate_e)
-
-        cv2.erode(im_ROI3, erode_e)
-        cv2.dilate(im_ROI3, dilate_e)
-
         # Find contours
         # If we wanna show the images, we want to show
         # the UNALTERED (in the process of finding contours) images
         # so we can calibrate lighting
         if self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contours2, hierarchy = cv2.findContours(im_ROI2.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contours3, hierarchy = cv2.findContours(im_ROI3.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
         # if we don't want to see the gui we don't do that
         # so its more effective
         elif not self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contours2, hierarchy = cv2.findContours(im_ROI2,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contours3, hierarchy = cv2.findContours(im_ROI3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
-        # Variables to store ALL contour_coordinates
-        contour_no = -1
-        contour_coordinates = []
-        contourg_coordinates = []
-        contourh_coordinates = [] # Coordinates to store of detects a black line perpendicular to the black line tracking (meaning that we're reached a green box)
-
         # List to store INTERESTED contour_coordinates
-        contour_coordinates_priority = []
-        contourg_coordinates_priority = []
+        blackline_x_location = -1
+        greenbox_x_location = -1
 
-        # Loop through each contours
-        for j in contours, contours2, contours3:
-            # Variable to notify us which contour we're on (contours, contours2, or contours3)
-            contour_no += 1
+        # Find contours in blackline ROI
+        for i in contours:
+            # Gets the area of each contour
+            area = cv2.contourArea(i)
 
-            for i in j:
-                # Gets the area of each contour
-                area = cv2.contourArea(i)
+            # Get dictionary keys for moments
+            moments = cv2.moments (i)
 
-                # Get dictionary keys for moments
-                moments = cv2.moments (i)
+            # We only want to get an area of > the threshold to prevent not usable contours
+            if area>AREA_THRESH:
+                if moments['m00']!=0.0:
+                    if moments['m01']!=0.0:
+                        # We can calculate the centroid coordinates using this
+                        cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
+                        cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
 
-                # We only want to get an area of > the threshold to prevent not usable contours
-                if area>AREA_THRESH:
-                    if moments['m00']!=0.0:
-                        if moments['m01']!=0.0:
-                            # We can calculate the centroid coordinates using this
-                            cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
-                            cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+                        # If we are showing our GUI
+                        # then we needa draw circles
+                        # indicating where we found the lines
+                        if self.is_show_gui:
+                            cv2.circle(frame, (cx, cy+ROI_Y), 4, BLUE_COLOR, -1)
+                            cv2.putText(frame, 'Area ROI_ :' + str(area),(10, 25), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
 
-                            # If we are showing our GUI
-                            # then we needa draw circles
-                            # indicating where we found the lines
-                            if self.is_show_gui:
-                                cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, BLUE_COLOR, -1)
-                                cv2.putText(frame, 'Area ROI_' + str(contour_no+1) + " :" + str(area),(10, 25+(ROI_DIF*contour_no)), cv2.FONT_HERSHEY_PLAIN, 1, (255,0,0),2)
-
-                            # Store our centroid coordinates
-                            contour_coordinates.append(cx)
-
+                        # If we're previously found a coordinate
+                        if blackline_x_location != -1:
                             # Find contours which are closest to the middle (so PID can be performed)
-                            if len(contour_coordinates_priority) >= (contour_no+1):
-                                if abs(MIDDLE-cx) <= abs(MIDDLE-contour_coordinates_priority[contour_no]):
-                                    contour_coordinates_priority[contour_no] = cx
+                            if abs(MIDDLE-cx) <= abs(MIDDLE-blackline_x_location):
+                                blackline_x_location = cx
 
-                            else:
-                                contour_coordinates_priority.append(cx)
-
-                            # Check to see if its a horizontal line
-                            if area > ROIh_AREA_THRESH:
-                                contourh_coordinates.append(cx)
-
-                                if self.is_show_gui:
-                                    cv2.circle(frame, (cx, cy+ROI_START+(ROI_DIF*contour_no)), 4, RED_COLOR, -1)
-                                    cv2.putText(frame, 'Area ROI_h: ' + str(area), (10, 195), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
-
-        # Sets is blackline straight boolean var
-        # Used for calibration AFTER green box
-        if len(contour_coordinates_priority) >= 1:
-            self.is_black_line_straight = True
-            for x in contour_coordinates_priority:
-                if x < BLACKLINE_MIN_X or x > BLACKLINE_MAX_X:
-                    self.is_black_line_straight = False
-        else:
-            self.is_black_line_straight = False
-
-        if self.is_show_gui:
-            if self.is_black_line_straight:
-                cv2.putText(frame, 'Straight line detected!', (10, 210), cv2.FONT_HERSHEY_PLAIN, 1, (131, 130, 224), 2)
-
+                        else:
+                            blackline_x_location = cx       
 
         # Resets greenbox location
         self.is_prev_green_detected = False
 
-        # Green filter
+        # Green contour finder in green ROI
         for i in contoursg:
             area = cv2.contourArea(i)
             moments = cv2.moments(i)
 
-            if area > GREEN_AREA_MIN and area < GREEN_AREA_MAX:
+            if area > GREEN_AREA_THRESH:
                 if moments['m00'] != 0.0:
                     if moments['m01'] != 0.0:
                         cx = int(moments['m10']/moments['m00'])
@@ -219,59 +169,57 @@ class img_procs:
                             cv2.circle(frame, (cx, cy+ROIg_Y), 4, GREEN_COLOR, -1)
                             cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (0,255,0),2)
 
-                        contourg_coordinates.append(cx)
-
                         # If we have previously found a green region
-                        if len(contourg_coordinates_priority) >= 1:
+                        if greenbox_x_location != -1:
                             # Since green is indicative of where we wanna travel,
                             # we'll calculate the PID from the contour
                             # furthest away from center
-                            if abs(MIDDLE-cx) >= abs(MIDDLE-contourg_coordinates_priority[0]):
+                            if abs(MIDDLE-cx) >= abs(MIDDLE-greenbox_x_location):
                                 # We only care about the x coordinates
-                                contourg_coordinates_priority[0] = cx
+                                greenbox_x_location = cx
 
                         else:
-                            contourg_coordinates_priority.append(cx)
+                            greenbox_x_location = cx
 
                         # We have detected a green box
                         self.is_prev_green_detected = True
+                        
+        # Sets is blackline straight boolean var
+        # Used for calibration AFTER green box
+        if blackline_x_location != -1:
+            self.is_black_line_straight = True
+            if blackline_x_location < BLACKLINE_MIN_X or blackline_x_location > BLACKLINE_MAX_X:
+                self.is_black_line_straight = False
+        else:
+            self.is_black_line_straight = False
 
-            # If area is greater than GREEN_AREA_MAX
-            # probs at the end already (all green)
-            else:
-                pass
+        if self.is_show_gui:
+            if self.is_black_line_straight:
+                cv2.putText(frame, 'Straight line detected!', (10, 210), cv2.FONT_HERSHEY_PLAIN, 1, (131, 130, 224), 2)
 
+        # PID code
         i = 0
         PID_TOTAL = 0
 
-        # PID for line following
-        for c in contour_coordinates_priority:
-            # Update PID code here
-            ERROR = MIDDLE-c # Gets error between target value and actual value
-            P_VAL = KP*ERROR # Gets proportional val
-            D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
-            DERIVATOR = ERROR
+        # PID calculation for motor power output
+        # in order to follow line
+        ERROR = MIDDLE-blackline_x_location # Gets error between target value and actual value
+        P_VAL = KP*ERROR # Gets proportional val
+        D_VAL = KD*(ERROR-DERIVATOR) # Gets derivative val
+        DERIVATOR = ERROR
 
-            # Calculate integral of error
-            I_VAL = I_VAL + ERROR
+        # Calculate integral of error
+        I_VAL = I_VAL + ERROR
 
-            if I_VAL > I_MAX:
-                I_VAL = I_MAX
-            elif I_VAL < I_MIN:
-                I_VAL = I_MIN
+        if I_VAL > I_MAX:
+            I_VAL = I_MAX
+        elif I_VAL < I_MIN:
+            I_VAL = I_MIN
 
-            #  Calculate total PID value here
-            PID_VAL = P_VAL + D_VAL + I_VAL
-
-            # Strength of each PID is determined by its placing (Furthest = more, nearest = less)
-            PID_TOTAL += (PID_MULTI_THRES/(i+1))*PID_VAL
-            # Or PID_TOTAL += (PID_MULTI_THRES*(i+1))*PID_VAL
-
-            # Since we have 3 different readings at three different locations
-            # we give each reading a different weighting
-            # the further it is the smaller affect it will have on the PID value
-            # i is used to determine the weighting of each contour found
-            i = i + 1
+        #  Calculate total PID value here
+        PID_VAL = P_VAL + D_VAL + I_VAL
+        
+        PID_TOTAL += PID_VAL
 
         # Calculate motor rotation per second
         R_MOTOR_RPS = MOTOR_RPS+PID_TOTAL
@@ -285,7 +233,7 @@ class img_procs:
         self.lmotor_value = L_MOTOR_RPS = math.ceil(L_MOTOR_RPS * 100) / 100.0
 
         # If it detects line(s) [green or black]
-        if len(contour_coordinates_priority) >= 1:
+        if blackline_x_location != -1:
             # Saves right motor command
             self.rmotor_cmd = 'right change_rps(' + str(R_MOTOR_RPS) + ')'
             if not self.is_show_gui:
@@ -309,23 +257,31 @@ class img_procs:
         # If we wanna see gui
         if self.is_show_gui:
             if frame is not None:
+                # Show unaltered frame
                 if self.img_enum == '0':
                     cv2.imshow('pi camera', frame)
 
+                # Show specific region for blackline detection
                 elif self.img_enum == '1':
                     cv2.imshow('pi camera', im_ROI)
 
+                # Show green line detection    
                 elif self.img_enum == '2':
-                    cv2.imshow('pi camera', im_ROI2)
-
-                elif self.img_enum == '3':
-                    cv2.imshow('pi camera', im_ROI3)
-
-                elif self.img_enum == '4':
                     cv2.imshow('pi camera', im_ROIg)
 
-                elif self.img_enum == '5':
+                # Show grayscale image
+                elif self.img_enum == '3':
                     cv2.imshow('pi camera', cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+                
+                # B&W for whole frame    
+                elif self.img_enum == '4':
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    ret, frame = cv2.threshold(frame, THRESH, 255, 0)
+                    cv2.bitwise_not(im_ROI, im_ROI)
+                    cv2.erode(frame, erode_e)
+                    cv2.dilate(frame, dilate_e)
+                    cv2.imshow('pi camera', frame)
+                    
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
@@ -352,7 +308,7 @@ class img_procs:
 
     def get_greenbox_location(self):
         # Gets global variables from settings.py
-        global GREEN_RANGE, GREEN_THRESH, MIDDLE, GREEN_AREA_MIN, GREEN_AREA_MAX
+        global GREEN_RANGE, GREEN_THRESH, MIDDLE, GREEN_AREA_THRESH
 
         # Gets feed from camera
         ret, frame = self.cap.read()
@@ -388,7 +344,7 @@ class img_procs:
 
             moments = cv2.moments(i)
 
-            if area > GREEN_AREA_MIN and area < GREEN_AREA_MAX:
+            if area > GREEN_AREA_THRESH:
                 if moments['m00'] != 0.0:
                     if moments['m01'] != 0.0:
                         cx = int(moments['m10']/moments['m00'])
