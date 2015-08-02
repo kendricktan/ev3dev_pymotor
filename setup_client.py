@@ -96,17 +96,20 @@ while True:
 
         # Updates camera feed so it doesn't use outdated feed
         # (Blame it on pi's processing power)
-        for x in range(0, 20):
+        for x in range(0, 10):
             pi_img_procs.update()
 
-        time.sleep(0.25)
+        time.sleep(0.01)
 
         # Keeps moving slowly until it finds a straight black line
         client.send('run_forever')
 
         time.sleep(0.1)
+
         while not pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()
+
+        client.send('stop')
 
         # Runs slower for the next 5 seconds to allow ample time for calibration
         green_end_time = time.time()

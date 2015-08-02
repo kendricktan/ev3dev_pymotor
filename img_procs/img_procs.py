@@ -55,7 +55,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
@@ -63,9 +63,8 @@ class img_procs:
         # Define our regions of interest
         # Black line ROI
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
-
         # Greenbox ROI
-        ROIg = frame [ROIg_Y:(ROIg_Y+50), 0:320]
+        ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
