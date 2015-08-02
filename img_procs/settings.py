@@ -29,7 +29,7 @@ ROI_Y = 120
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 75 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 100 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 1250 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
