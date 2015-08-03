@@ -84,7 +84,7 @@ while True:
         elif 'right' in greenbox_location:
             client.send('green_at_right')
 
-        time.sleep(1.85)
+        time.sleep(1.2)
 
         # Resets greenbox value
         pi_img_procs.reset_greenbox()
@@ -99,12 +99,15 @@ while True:
         for x in range(0, 10):
             pi_img_procs.update()
 
-        time.sleep(0.01)
+        time.sleep(0.05)
 
-        # Keeps moving slowly until it finds a straight black line
+        # Starts moving slowly
         client.send('run_forever')
 
-        time.sleep(0.1)
+        time.sleep(0.05)
+        
+        while pi_img_procs.get_is_detected_black_line():
+            pi_img_procs.update()
 
         while not pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()

@@ -112,6 +112,7 @@ def translate(raw_str):
                 time.sleep(1.25)
 
                 # Rotate 45 degrees clockwise
+                '''
                 for motor in motors:
                     if 'left' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
@@ -119,6 +120,7 @@ def translate(raw_str):
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
 
                 time.sleep(0.65)
+                '''                 
 
                 # Stop and set rps
                 for motor in motors:
@@ -152,12 +154,13 @@ def translate(raw_str):
                 time.sleep(1.25)
 
                 # Rotate 45 degrees anticlockwise
+                '''
                 for motor in motors:
                     if 'left' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_GREEN_FORWARD)
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-
+                '''
 
                 time.sleep(0.65)
 

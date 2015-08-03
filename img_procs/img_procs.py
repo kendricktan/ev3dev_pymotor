@@ -40,6 +40,7 @@ class img_procs:
         # Is the black line straight
         #(Used for calibration after greenbox)
         self.is_black_line_straight = False
+        self.is_detected_black_line = False
 
 
     # Does it show the GUI for img processing
@@ -115,6 +116,9 @@ class img_procs:
         blackline_x_location = -1
         greenbox_x_location = -1
 
+        # Did we find a blackline
+        self.is_detected_black_line = False
+        
         # Find contours in blackline ROI
         for i in contours:
             # Gets the area of each contour
@@ -130,6 +134,9 @@ class img_procs:
                         # We can calculate the centroid coordinates using this
                         cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+                        
+                        # We found a blackline
+                        self.is_detected_black_line = True
 
                         # If we are showing our GUI
                         # then we needa draw circles
@@ -365,6 +372,9 @@ class img_procs:
 
     def get_is_black_line_straight(self):
         return self.is_black_line_straight
+        
+    def get_is_detected_black_line(self):
+        return self.is_detected_black_line
 
     def get_rmotor_value(self):
         return self.rmotor_value
