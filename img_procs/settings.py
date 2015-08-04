@@ -20,7 +20,7 @@ PID_TOTAL = 0
 ERROR = 0
 
 # Motor speed
-MOTOR_RPS = 0.65 # rotations per scond
+MOTOR_RPS = 0.75 # rotations per scond
 MOTOR_RPS_MIN = -2.0
 # If line is on the right = negative value
 
@@ -33,7 +33,7 @@ THRESH = 100 # Change threshold to higher if can't detect line; Change to lower 
 AREA_THRESH = 1250 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
-ROIg_Y = CAMERA_HEIGHT-60
+ROIg_Y = CAMERA_HEIGHT-40
 
 GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([55, 75, 105], [85, 145, 185])] # HSV, use get_hsv.py to calibrate it
