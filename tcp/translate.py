@@ -5,6 +5,9 @@ import time
 def translate(raw_str):
     _str = raw_str.split()
 
+    if len(_str) == 0:
+        return
+
     # If not specify which motor
     # automatically assumes all motors
     # in list
