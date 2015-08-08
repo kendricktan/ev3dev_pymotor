@@ -12,12 +12,12 @@ def translate(raw_str):
     # automatically assumes all motors
     # in list
     # Special functions will also be translated here
-    
+
     # Also we only wanna move left and right motors
     # We don't wanna move crane unless specifically specified
     if len(_str) <= 1:
         if 'run_forever' in _str[0]:
-    	    try:    	    
+    	    try:
                 for motor in motors:
                     if 'crane' not in motor:
                         motors[motor].run_forever()
@@ -44,7 +44,7 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    if 'crane' not in motor:                
+                    if 'crane' not in motor:
                         motors[motor].set_rps(float(args))
             except:
                 pass
@@ -132,7 +132,7 @@ def translate(raw_str):
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
 
                 time.sleep(0.65)
-                '''                 
+                '''
 
                 # Stop and set rps
                 for motor in motors:
@@ -187,31 +187,40 @@ def translate(raw_str):
 
             except:
                 pass
-            
-        # Crane grab can    
+
+        # Crane grab can
         elif 'can_detected' in _str[0]:
             try:
+                # Sets standard RPS for motors
                 for motor in motors:
                     set_rps(0.75)
-                    
+
+                # 'Push' can into position
+                motors['right'].run_to_rel_pos(125)
+                motors['left'].run_to_rel_pos(125)
+                time.sleep(0.75)
+                motors['right'].run_to_rel_pos(-25)
+                motors['left'].run_to_rel_pos(-25)
+                time.sleep(0.35)
+
                 # Lower crane
                 motors['crane'].run_to_rel_pos(-1250)
                 time.sleep(6.5)
-                
+
                 # 'Wobbles' crane around in case it didn't land on can
                 motors['right'].run_to_rel_pos(50)
-                time.sleep(0.25)
+                time.sleep(0.35)
                 motors['right'].run_to_rel_pos(-50)
-                time.sleep(0.25)             
-                
+                time.sleep(0.35)
+
                 motors['left'].run_to_rel_pos(50)
-                time.sleep(0.25)
+                time.sleep(0.35)
                 motors['left'].run_to_rel_pos(-50)
-                time.sleep(0.25)
-                
+                time.sleep(0.35)
+
                 # Continue lowering crane
                 motors['crane'].run_to_rel_pos(-500)
-                
+
             except:
                 pass
 
