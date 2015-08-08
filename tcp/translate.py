@@ -12,25 +12,31 @@ def translate(raw_str):
     # automatically assumes all motors
     # in list
     # Special functions will also be translated here
+    
+    # Also we only wanna move left and right motors
+    # We don't wanna move crane unless specifically specified
     if len(_str) <= 1:
         if 'run_forever' in _str[0]:
-    	    try:
+    	    try:    	    
                 for motor in motors:
-                    motors[motor].run_forever()
+                    if 'crane' not in motor:
+                        motors[motor].run_forever()
             except:
                 pass
 
         elif 'stop' in _str[0]:
             try:
                 for motor in motors:
-                    motors[motor].stop()
+                    if 'crane' not in motor:
+                        motors[motor].stop()
             except:
                 pass
 
         elif 'toggle' in _str[0]:
             try:
                 for motor in motors:
-                    motors[motor].toggle()
+                    if 'crane' not in motor:
+                        motors[motor].toggle()
             except:
                 pass
 
@@ -38,7 +44,8 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    motors[motor].set_rps(float(args))
+                    if 'crane' not in motor:                
+                        motors[motor].set_rps(float(args))
             except:
                 pass
 
@@ -46,7 +53,8 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    motors[motor].change_rps(float(args))
+                    if 'crane' not in motor:
+                        motors[motor].change_rps(float(args))
             except:
                 pass
 
@@ -54,7 +62,8 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    motors[motor].run_to_rel_pos(int(args))
+                    if 'crane' not in motor:
+                        motors[motor].run_to_rel_pos(int(args))
             except:
                 pass
 

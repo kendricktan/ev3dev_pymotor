@@ -21,3 +21,7 @@ motors['right'] = ev3dev_pymotor.ev3dev_pymotor('outB')
 
 motors['left'].set_rps(0.5)
 motors['right'].set_rps(0.5)
+
+# Extra motor to act as a crane
+motors['crane'] = ev3dev_pymotor.ev3dev_pymotor('outC')
+motors['crane'].set_rps(0.5)
