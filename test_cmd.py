@@ -25,17 +25,15 @@ start_time = time.time()
 # get platform dist
 platform_dist = us_sens01.get_lowest_reading()
 
-print platform_dist
-
 # Turn 180 degrees
-client.send('left run_to_rel_pos(-475)')
-client.send('right run_to_rel_pos(475)')
+client.send('left run_to_rel_pos(-485)')
+client.send('right run_to_rel_pos(485)')
 
 time.sleep(4)
 
 # Begin turn
-client.send('left change_rps(0.15)')
-client.send('right change_rps(-0.15)')
+client.send('left change_rps(0.25)')
+client.send('right change_rps(-0.25)')
 
 time.sleep(0.1)
 
@@ -44,9 +42,39 @@ time.sleep(0.1)
 dist = us_sens01.get_lowest_reading()
 
 # Until we found an object we'll keep moving
-while abs(platform_dist-dist) > 5:
+while abs(platform_dist-dist) > 15:
     dist = us_sens01.get_lowest_reading()
 
-print dist
+# Go forward to grab object
+client.send('left change_rps(0.25)')
+client.send('right change_rps(0.25)')
+
+while True:
+    dist = us_sens01.get_lowest_reading()
+
+    # Object is beyong sight, needa recalibrate
+    if abs(platform_dist-dist) > 15:
+        # Turn right a bit
+        client.send('right run_to_rel_pos(-50)')
+        client.send('left run_to_rel_pos(50)')
+
+        time.sleep(0.7)
+
+        dist = us_sens01.get_lowest_reading()
+
+        # Change 15 to something else
+        if abs(platform_dist-dist) > 15:
+            client.send('right run_to_rel_pos(-100)')
+            client.send('left run_to_rel_pos(100)')
+            time.sleep(0.7)
+
+        else:
+            print 'found object!'
+
+    elif dist <= 5:
+        print 'in front of object!'
+        client.send('stop')
+        break
+
 
 client.send('stop')
