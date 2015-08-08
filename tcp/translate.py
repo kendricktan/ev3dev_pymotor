@@ -187,6 +187,33 @@ def translate(raw_str):
 
             except:
                 pass
+            
+        # Crane grab can    
+        elif 'can_detected' in _str[0]:
+            try:
+                for motor in motors:
+                    set_rps(0.75)
+                    
+                # Lower crane
+                motors['crane'].run_to_rel_pos(-1250)
+                time.sleep(6.5)
+                
+                # 'Wobbles' crane around in case it didn't land on can
+                motors['right'].run_to_rel_pos(50)
+                time.sleep(0.25)
+                motors['right'].run_to_rel_pos(-50)
+                time.sleep(0.25)             
+                
+                motors['left'].run_to_rel_pos(50)
+                time.sleep(0.25)
+                motors['left'].run_to_rel_pos(-50)
+                time.sleep(0.25)
+                
+                # Continue lowering crane
+                motors['crane'].run_to_rel_pos(-500)
+                
+            except:
+                pass
 
 
         # Phase for avoiding object detected by ultrasonic sensor
