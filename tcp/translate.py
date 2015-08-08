@@ -193,19 +193,19 @@ def translate(raw_str):
             try:
                 # Sets standard RPS for motors
                 for motor in motors:
-                    set_rps(0.75)
+                    motors[motor].set_rps(0.75)
 
                 # 'Push' can into position
                 motors['right'].run_to_rel_pos(125)
                 motors['left'].run_to_rel_pos(125)
                 time.sleep(0.75)
-                motors['right'].run_to_rel_pos(-25)
-                motors['left'].run_to_rel_pos(-25)
-                time.sleep(0.35)
+                motors['right'].run_to_rel_pos(-100)
+                motors['left'].run_to_rel_pos(-100)
+                time.sleep(0.55)
 
                 # Lower crane
                 motors['crane'].run_to_rel_pos(-1250)
-                time.sleep(6.5)
+                time.sleep(5.5)
 
                 # 'Wobbles' crane around in case it didn't land on can
                 motors['right'].run_to_rel_pos(50)
