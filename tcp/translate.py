@@ -191,8 +191,8 @@ def translate(raw_str):
         ### Commands for crane operation ###
         elif 'reverse_short' in _str[0]:
             try:
-                motors['right'].run_to_rel_pos(-360)
-                motors['left'].run_to_rel_pos(-360)
+                motors['right'].run_to_rel_pos(-210)
+                motors['left'].run_to_rel_pos(-210)
 
                 time.sleep(2.5)
 

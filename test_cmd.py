@@ -107,7 +107,7 @@ time.sleep(2.5)
 
 # Turn clockwise until it finds the platform
 # based on timing :\
-rotate_time = 5.6-(end_turn_time-start_turn_time)
+rotate_time = 5-(end_turn_time-start_turn_time)
 
 start_turn_time = time.time()
 
@@ -121,8 +121,18 @@ client.send('stop')
 # Go forward until reaches platform
 client.send('change_rps(0.35)')
 
-while us_sens01.get_lowest_reading() > 5:
-    pass
+# 4 seconds should be enough
+time.sleep(4)
+
+client.send('stop')
+
+# Reverses a little bit
+client.send('run_to_rel_pos(-85)')
+time.sleep(1)
 
 # Drops can
 servo.degrees_0()
+
+time.sleep(2)
+
+client.send('change_rps(-0.75)')
