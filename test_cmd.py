@@ -83,13 +83,33 @@ while True:
         client.send('stop')
         break
 
+# Proceeding steps to drop can at platform
 print 'found object!'
 client.send('stop')
 time.sleep(0.1)
+
+# Positions servo to grab can
 client.send('can_detected')
 time.sleep(12.5)
+
+# Actually grabs can
 servo.degrees_180()
 time.sleep(0.5)
+
+# Pull cna up
 client.send('crane run_to_rel_pos(1750)')
 time.sleep(8)
 
+# Reverses the robot
+client.send('set_rps(-0.75)')
+time.sleep(0.1)
+client.send('run_to_rel_pos(360)')
+time.sleep(2)
+
+# Turn clockwise until it finds the platform
+client.send('clockwise_slow')
+
+while us_sens01.get_lowest_reading() >= 25:
+    pass
+
+client.send('stop')
