@@ -189,6 +189,16 @@ def translate(raw_str):
                 pass
 
         ### Commands for crane operation ###
+        elif 'reverse_short' in _str[0]:
+            try:
+                motors['right'].run_to_rel_pos(-360)
+                motors['left'].run_to_rel_pos(-360)
+
+                time.sleep(2.5)
+
+            except:
+                pass
+
         # Nudge crane to the right for a little bit
         elif 'crane_nudge_right' in _str[0]:
             try:
@@ -267,7 +277,7 @@ def translate(raw_str):
                 time.sleep(0.1)
                 motors['right'].run_to_rel_pos(490)
 
-                time.sleep(4)
+                time.sleep(3.5)
 
             except:
                 pass

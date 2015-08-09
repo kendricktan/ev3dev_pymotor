@@ -39,16 +39,24 @@ time.sleep(0.25)
 
 # Turn 180 degrees
 client.send('degrees_180')
-time.sleep(1.33)
+time.sleep(3.5)
 
 # Begin turning clockwise slowly
 client.send('clockwise_slow')
 
 time.sleep(0.6)
 
+# Takes around 5.6 seconds to rotate 180 degrees
+# with 0.25 rps
+# Use this to calculate ~ how much to turn later
+
+start_turn_time = time.time()
+
 # Until we found an object we'll keep moving
 while us_sens01.get_lowest_reading() > 25:
     pass
+
+end_turn_time = time.time()
 
 # Go forward to grab object
 client.send('left change_rps(0.25)')
@@ -94,5 +102,27 @@ client.send('crane run_to_rel_pos(1750)')
 time.sleep(8)
 
 # Reverses the robot
+client.send('reverse_short')
+time.sleep(2.5)
 
 # Turn clockwise until it finds the platform
+# based on timing :\
+rotate_time = 5.6-(end_turn_time-start_turn_time)
+
+start_turn_time = time.time()
+
+client.send('clockwise_slow')
+
+while time.time()-start_turn_time <= rotate_time:
+    pass
+
+client.send('stop')
+
+# Go forward until reaches platform
+client.send('change_rps(0.35)')
+
+while us_sens01.get_lowest_reading() > 5:
+    pass
+
+# Drops can
+servo.degrees_0()
