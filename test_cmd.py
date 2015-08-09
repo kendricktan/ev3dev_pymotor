@@ -19,7 +19,7 @@ client = client_tcp(TCP_IP)
 print 'Successfully connected to ' + TCP_IP +  '...'
 
 # Where is muh can
-can_relative_location = 'left'
+can_relative_position = 'left'
 
 
 # Initialize Ultrasonic sensor class
