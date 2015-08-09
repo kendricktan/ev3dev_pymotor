@@ -40,6 +40,10 @@ class img_procs:
         # Is the black line straight
         #(Used for calibration after greenbox)
         self.is_black_line_straight = False
+        self.is_detected_black_line = False
+
+        # Have we found aluminium (end zone)
+        self.is_aluminium_found = False
 
 
     # Does it show the GUI for img processing
@@ -55,7 +59,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
@@ -65,9 +69,12 @@ class img_procs:
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         # Greenbox ROI
         ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
+        # Aluminium ROI
+        ROIa = frame [0:ROIa_Y, 0:320]
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
+        ROIa = cv2.cvtColor(ROIa, cv2.COLOR_BGR2HSV)
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -79,16 +86,26 @@ class img_procs:
             mask = cv2.inRange(ROIg, lower, upper)
             ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)
 
+        # Aluminium filter
+        for (lower, upper) in ALUMINIUM_RANGE:
+            lower = np.array(lower, dtype='uint8')
+            upper = np.array(upper, dtype='uint8')
+
+            mask = cv2.inRange(ROIa, lower, upper)
+            ROIa = cv2.bitwise_and(ROIa, ROIa, mask=mask)
+
         # Converts ROI's into Grayscale
         im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
         im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
+        im_ROIa = cv2.cvtColor(ROIa, cv2.COLOR_BGR2GRAY)
 
         # Apply Threshold filter to smoothen edges and convert images to negative
         ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
         cv2.bitwise_not(im_ROI, im_ROI)
 
         ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
-        # Do NOT bitwise_not im_ROIg
+        ret, im_ROIa = cv2.threshold(im_ROIa, ALUMINIUM_THRESH, 255, 0)
+        # Do NOT bitwise_not im_ROIg or im_ROIa
 
         # Reduces noise in image and dilate to increase white region (since its negative)
         erode_e = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3));
@@ -104,16 +121,21 @@ class img_procs:
         if self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            contoursa, hierarchy = cv2.findContours(im_ROIa.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # if we don't want to see the gui we don't do that
         # so its more effective
         elif not self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            contoursa, hierarchy = cv2.findContours(im_ROIa, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # List to store INTERESTED contour_coordinates
         blackline_x_location = -1
         greenbox_x_location = -1
+
+        # Did we find a blackline
+        self.is_detected_black_line = False
 
         # Find contours in blackline ROI
         for i in contours:
@@ -130,6 +152,9 @@ class img_procs:
                         # We can calculate the centroid coordinates using this
                         cx = int(moments['m10']/moments['m00'])         # cx = M10/M00
                         cy = int(moments['m01']/moments['m00'])         # cy = M01/M00
+
+                        # We found a blackline
+                        self.is_detected_black_line = True
 
                         # If we are showing our GUI
                         # then we needa draw circles
@@ -195,6 +220,27 @@ class img_procs:
         if self.is_show_gui:
             if self.is_black_line_straight:
                 cv2.putText(frame, 'Straight line detected!', (10, 210), cv2.FONT_HERSHEY_PLAIN, 1, (131, 130, 224), 2)
+
+        # Resets aluminium boolean
+        self.is_aluminium_found = False
+
+        # Aluminium contour finder in aluminium ROI
+        for i in contoursa:
+            area = cv2.contourArea(i)
+            moments = cv2.moments(i)
+
+            if area > ALUMINIUM_AREA_THRESH:
+                if moments['m00'] != 0.0:
+                    if moments['m01'] != 0.0:
+                        cx = int(moments['m10']/moments['m00'])
+                        cy = int(moments['m01']/moments['m00'])
+
+                        # found aluminium! woots end zone
+                        self.is_aluminium_found = True
+
+                        if self.is_show_gui:
+                            cv2.circle(frame, (cx, cy), 4, YELLOW_COLOR, -1)
+                            cv2.putText(frame, 'Aluminium found!', (10, 75), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255), 2)
 
         # PID code
         i = 0
@@ -268,12 +314,16 @@ class img_procs:
                 elif self.img_enum == '2':
                     cv2.imshow('pi camera', im_ROIg)
 
-                # Show grayscale image
+                # Show aluminium roi
                 elif self.img_enum == '3':
+                    cv2.imshow('pi camera', im_ROIa)
+
+                # Show grayscale image
+                elif self.img_enum == '4':
                     cv2.imshow('pi camera', cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
 
                 # B&W for whole frame
-                elif self.img_enum == '4':
+                elif self.img_enum == '5':
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     ret, frame = cv2.threshold(frame, THRESH, 255, 0)
                     cv2.bitwise_not(im_ROI, im_ROI)
@@ -365,6 +415,9 @@ class img_procs:
 
     def get_is_black_line_straight(self):
         return self.is_black_line_straight
+
+    def get_is_detected_black_line(self):
+        return self.is_detected_black_line
 
     def get_rmotor_value(self):
         return self.rmotor_value

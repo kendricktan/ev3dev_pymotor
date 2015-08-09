@@ -13,8 +13,7 @@ if len(sys.argv) > 1:
 
 TCP_PORT = 5005
 TCP_IP = str(sys.argv[1]) if len(sys.argv) > 1 else ''
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((TCP_IP, 5005))
+client = client_tcp(TCP_IP)
 
 print 'Successfully connected to ' + TCP_IP +  '...'
 
@@ -78,49 +77,45 @@ while True:
         # Gets greenbox location
         greenbox_location = pi_img_procs.get_greenbox_location()
 
+        # Goes slowly along blackline until passes the greenbox
+        while pi_img_procs.get_is_greenbox():
+            pi_img_procs.update()
+            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
+            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
+
+        time.sleep(0.075)
+
+        # Starts over the blackline (if any)
+        # Sleep helps provide consistent packet sending
+        client.send('stop')
+        time.sleep(0.075)
+        client.send('set_rps(0.75)')
+        time.sleep(0.075)
+        client.send('run_to_rel_pos(145)')
+        time.sleep(1)
+        client.send('stop')
+        time.sleep(0.075)
+
+        # Sends robot in direction of the greenbox
         if 'left' in greenbox_location:
-            client.send('green_at_left')
+            client.send('left change_rps(-0.25)')
+            time.sleep(0.075)
+            client.send('right change_rps(0.25)')
 
         elif 'right' in greenbox_location:
-            client.send('green_at_right')
+            client.send('right change_rps(-0.25)')
+            time.sleep(0.075)
+            client.send('left change_rps(0.25)')
 
-        time.sleep(1.85)
-
-        # Resets greenbox value
-        pi_img_procs.reset_greenbox()
-
-        # Resets PID values so it doesn't
-        # confuse the algorithm with sudden
-        # changes
-        pi_img_procs.reset_PID()
-
-        # Updates camera feed so it doesn't use outdated feed
-        # (Blame it on pi's processing power)
-        for x in range(0, 10):
+        # This is merely a pattern formed in robocup 2015
+        # that we're taking advantage of
+        while pi_img_procs.get_is_detected_black_line():
             pi_img_procs.update()
-
-        time.sleep(0.01)
-
-        # Keeps moving slowly until it finds a straight black line
-        client.send('run_forever')
-
-        time.sleep(0.1)
 
         while not pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()
 
         client.send('stop')
-
-        # Runs slower for the next 5 seconds to allow ample time for calibration
-        green_end_time = time.time()
-
-        # Make it run at a lower speed
-        while time.time()-green_end_time <= 0.5:
-            pi_img_procs.update()
-
-            client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
-            client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
-
 
     # Updates camera feed
     pi_img_procs.update()

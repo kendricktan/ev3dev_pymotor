@@ -43,3 +43,15 @@ class us_read:
 
         return timepassed * 17000 # in cm
 
+    # Returns lowest reading out of 10 (because this us has some inconsistencies
+    def get_lowest_reading(self):
+        output = 1000
+        for x in range(0, 10):
+            dist = self.read()
+
+            if dist < output:
+                output = dist
+
+            time.sleep(0.03)
+
+        return output
