@@ -21,15 +21,10 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
 
+# Calibrates servo
 servo=servo_driver(4)
 servo.degrees_0()
-time.sleep(0.5)
-servo.degrees_180()
-time.sleep(0.5)
-servo.degrees_0()
-time.sleep(0.5)
-
-start_time = time.time()
+time.sleep(4)
 
 # Set initial rps
 client.send('set_rps(0.65')
@@ -44,7 +39,7 @@ time.sleep(0.25)
 
 # Turn 180 degrees
 client.send('degrees_180')
-time.sleep(4)
+time.sleep(1.33)
 
 # Begin turning clockwise slowly
 client.send('clockwise_slow')
@@ -52,9 +47,8 @@ client.send('clockwise_slow')
 time.sleep(0.6)
 
 # Until we found an object we'll keep moving
-dist = us_sens01.get_lowest_reading()
-while dist > 25:
-    dist = us_sens01.get_lowest_reading()
+while us_sens01.get_lowest_reading() > 25:
+    pass
 
 # Go forward to grab object
 client.send('left change_rps(0.25)')
@@ -84,7 +78,6 @@ while True:
         break
 
 # Proceeding steps to drop can at platform
-print 'found object!'
 client.send('stop')
 time.sleep(0.1)
 
@@ -101,15 +94,5 @@ client.send('crane run_to_rel_pos(1750)')
 time.sleep(8)
 
 # Reverses the robot
-client.send('set_rps(-0.75)')
-time.sleep(0.1)
-client.send('run_to_rel_pos(360)')
-time.sleep(2)
 
 # Turn clockwise until it finds the platform
-client.send('clockwise_slow')
-
-while us_sens01.get_lowest_reading() >= 25:
-    pass
-
-client.send('stop')

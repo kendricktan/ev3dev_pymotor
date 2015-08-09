@@ -13,7 +13,3 @@ servo.degrees_0()
 
 time.sleep(1)
 
-# Swings servo to neutral position
-servo.neutralposition()
-
-time.sleep(1)
