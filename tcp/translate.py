@@ -249,7 +249,9 @@ def translate(raw_str):
         elif 'clockwise_slow' in _str[0]:
             try:
                 motors['left'].change_rps(0.25)
+                time.sleep(0.3)
                 motors['right'].change_rps(-0.25)
+                time.sleep(0.3)
 
             except:
                 pass

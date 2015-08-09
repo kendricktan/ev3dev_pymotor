@@ -22,6 +22,12 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 us_sens01 = us_read(14, 15)
 
 servo=servo_driver(4)
+servo.degrees_0()
+time.sleep(0.5)
+servo.degrees_180()
+time.sleep(0.5)
+servo.degrees_0()
+time.sleep(0.5)
 
 start_time = time.time()
 
@@ -43,7 +49,7 @@ time.sleep(4)
 # Begin turning clockwise slowly
 client.send('clockwise_slow')
 
-time.sleep(0.1)
+time.sleep(0.6)
 
 # Until we found an object we'll keep moving
 dist = us_sens01.get_lowest_reading()
@@ -83,6 +89,7 @@ time.sleep(0.1)
 client.send('can_detected')
 time.sleep(12.5)
 servo.degrees_180()
+time.sleep(0.5)
 client.send('crane run_to_rel_pos(1750)')
 time.sleep(8)
 

@@ -18,7 +18,7 @@ class servo_driver:
         self.pwm = GPIO.PWM(GPIO_port, 50)
 
         # Starts pulse width modulation
-        self.pwm.start(2.5)
+        self.pwm.start(7.5)
 
     # Sets servo to 0 degrees
     def degrees_0(self):
