@@ -188,6 +188,88 @@ def translate(raw_str):
             except:
                 pass
 
+        ### Commands for crane operation ###
+        # Nudge crane to the right for a little bit
+        elif 'crane_nudge_right' in _str[0]:
+            try:
+                for motor in motors:
+                    motors[motor].set_rps(0.75)
+
+                motors['right'].run_to_rel_pos(-50)
+                motors['left'].run_to_rel_pos(50)
+
+                time.sleep(0.7)
+
+            except:
+                pass
+
+        # Nude crane to the left for a little bit
+        elif 'crane_nudge_left' in _str[0]:
+            try:
+                for motor in motors:
+                    motors[motor].set_rps(0.75)
+
+                motors['right'].run_to_rel_pos(50)
+                motors['left'].run_to_rel_pos(-50)
+
+                time.sleep(0.7)
+
+            except:
+                pass
+
+        # Strong nudge crane to the right
+        elif 'crane_s_nudge_right' in _str[0]:
+            try:
+                for motor in motors:
+                    motors[motor].set_rps(0.75)
+
+                motors['right'].run_to_rel_pos(-100)
+                motors['left'].run_to_rel_pos(100)
+
+                time.sleep(0.7)
+
+            except:
+                pass
+
+        # Strong nudge crane to the left
+        elif 'crane_s_nudge_left' in _str[0]:
+            try:
+                for motor in motors:
+                    motors[motor].set_rps(0.75)
+
+                motors['right'].run_to_rel_pos(100)
+                motors['left'].run_to_rel_pos(-100)
+
+                time.sleep(0.7)
+
+            except:
+                pass
+
+        # Slowly turns clockwise
+        elif 'clockwise_slow' in _str[0]:
+            try:
+                motors['left'].change_rps(0.25)
+                motors['right'].change_rps(-0.25)
+
+            except:
+                pass
+
+        # Rotates 180 degrees
+        elif 'degrees_180' in _str[0]:
+            try:
+                # Sets constant speed
+                for motor in motors:
+                    motors[motor].set_rps(0.75)
+
+                motors['left'].run_to_rel_pos(-490)
+                time.sleep(0.1)
+                motors['right'].run_to_rel_pos(490)
+
+                time.sleep(4)
+
+            except:
+                pass
+
         # Crane grab can
         elif 'can_detected' in _str[0]:
             try:
@@ -207,7 +289,7 @@ def translate(raw_str):
                 motors['crane'].run_to_rel_pos(-1250)
                 time.sleep(5.5)
 
-                # 'Wobbles' crane around in case it didn't land on can
+                # 'Nudges' crane around in case it didn't land on can
                 motors['right'].run_to_rel_pos(50)
                 time.sleep(0.35)
                 motors['right'].run_to_rel_pos(-50)
@@ -220,6 +302,18 @@ def translate(raw_str):
 
                 # Continue lowering crane
                 motors['crane'].run_to_rel_pos(-500)
+
+                # Nudges can one final time
+                motors['right'].run_to_rel_pos(50)
+                time.sleep(0.35)
+                motors['right'].run_to_rel_pos(-50)
+                time.sleep(0.35)
+
+                motors['left'].run_to_rel_pos(50)
+                time.sleep(0.35)
+                motors['left'].run_to_rel_pos(-50)
+                time.sleep(0.35)
+
 
             except:
                 pass

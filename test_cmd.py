@@ -29,6 +29,7 @@ start_time = time.time()
 client.send('set_rps(0.65')
 client.send('run_forever')
 
+# Goes straight until it's within 15cm of the platform
 while us_sens01.get_lowest_reading() >= 15:
     pass
 
@@ -36,21 +37,16 @@ client.send('stop')
 time.sleep(0.25)
 
 # Turn 180 degrees
-client.send('left run_to_rel_pos(-485)')
-time.sleep(0.1)
-client.send('right run_to_rel_pos(485)')
-
+client.send('degrees_180')
 time.sleep(4)
 
-# Begin turn
-client.send('left change_rps(0.25)')
-client.send('right change_rps(-0.25)')
+# Begin turning clockwise slowly
+client.send('clockwise_slow')
 
 time.sleep(0.1)
 
 # Until we found an object we'll keep moving
 dist = us_sens01.get_lowest_reading()
-
 while dist > 25:
     dist = us_sens01.get_lowest_reading()
 
@@ -64,19 +60,13 @@ while True:
     # Object is beyong sight, needa recalibrate
     if dist > 25:
         # Turn right a bit
-        client.send('right run_to_rel_pos(-50)')
-        client.send('left run_to_rel_pos(50)')
-
+        client.send('crane_nudge_right')
         time.sleep(0.7)
 
         dist = us_sens01.get_lowest_reading()
-
         # If still not within sight, then turn other direction
         if dist > 15:
-            client.send('right run_to_rel_pos(-100)')
-            time.sleep(0.1)
-            client.send('left run_to_rel_pos(100)')
-            time.sleep(0.7)
+            client.send('crane_s_nudge_left')
 
         else:
             client.send('stop')
@@ -94,5 +84,5 @@ client.send('can_detected')
 time.sleep(12.5)
 servo.degrees_180()
 client.send('crane run_to_rel_pos(1750)')
-time.sleep(10)
+time.sleep(8)
 
