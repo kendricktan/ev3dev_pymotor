@@ -266,6 +266,17 @@ def translate(raw_str):
             except:
                 pass
 
+        # Slowly turns anticlockwise
+        elif 'clockwise_anti_slow' in _str[0]:
+            try:
+                motors['left'].change_rps(-0.25)
+                time.sleep(0.3)
+                motors['right'].change_rps(0.25)
+                time.sleep(0.3)
+
+            except:
+                pass
+
         # Rotates 180 degrees
         elif 'degrees_180' in _str[0]:
             try:

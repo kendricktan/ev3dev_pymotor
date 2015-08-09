@@ -18,6 +18,10 @@ client = client_tcp(TCP_IP)
 
 print 'Successfully connected to ' + TCP_IP +  '...'
 
+# Where is muh can
+can_relative_location = 'left'
+
+
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
 
@@ -41,8 +45,11 @@ time.sleep(0.25)
 client.send('degrees_180')
 time.sleep(3.5)
 
-# Begin turning clockwise slowly
-client.send('clockwise_slow')
+# Begin turning anti-clockwise/clockwise slowly based on can's position
+if 'left' in can_relative_position:
+    client.send('clockwise_slow')
+elif 'right' in can_relative_position:
+    client.send('clockwise_anti_slow')
 
 time.sleep(0.6)
 
@@ -67,18 +74,26 @@ while True:
 
     # Object is beyong sight, needa recalibrate
     if dist > 25:
-        # Turn right a bit
-        client.send('crane_nudge_right')
-        time.sleep(0.7)
+        if 'left' in can_relative_position:
+            # Turn right a bit
+            client.send('crane_nudge_right')
+            time.sleep(0.7)
 
-        dist = us_sens01.get_lowest_reading()
-        # If still not within sight, then turn other direction
-        if dist > 15:
-            client.send('crane_s_nudge_left')
+            dist = us_sens01.get_lowest_reading()
+            # If still not within sight, then turn other direction
+            if dist > 15:
+                client.send('crane_s_nudge_left')
 
-        else:
-            client.send('stop')
-            break
+        elif 'right' in can_relative_position:
+            # Turn left a bit
+            client.send('crane_nudge_left')
+            time.sleep(0.7)
+
+            dist = us_sens01.get_lowest_reading()
+
+            # if still not within sight, then turn other direction
+            if dist > 15:
+                client.send('crane_s_nudge_right')
 
     # Found object
     elif dist <= 5:
@@ -111,7 +126,10 @@ rotate_time = 5-(end_turn_time-start_turn_time)
 
 start_turn_time = time.time()
 
-client.send('clockwise_slow')
+if 'left' in can_relative_position:
+    client.send('clockwise_slow')
+elif 'right' in can_relative_position:
+    client.send('clockwise_anti_slow')
 
 while time.time()-start_turn_time <= rotate_time:
     pass
@@ -127,7 +145,7 @@ time.sleep(4)
 client.send('stop')
 
 # Reverses a little bit
-client.send('run_to_rel_pos(-85)')
+client.send('run_to_rel_pos(-100)')
 time.sleep(1)
 
 # Drops can
