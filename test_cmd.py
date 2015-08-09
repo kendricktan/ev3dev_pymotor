@@ -2,6 +2,7 @@ from ev3dev_pymotor.ev3dev_pymotor import *
 from img_procs.img_procs import *
 from us_read.us_read import *
 from tcp.client import *
+from servo.servo_driver import *
 import time
 
 # Initalizes tcp connection
@@ -20,13 +21,23 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
 
+servo=servo_driver(4)
+
 start_time = time.time()
 
-# get platform dist
-platform_dist = us_sens01.get_lowest_reading()
+# Set initial rps
+client.send('set_rps(0.65')
+client.send('run_forever')
+
+while us_sens01.get_lowest_reading() >= 15:
+    pass
+
+client.send('stop')
+time.sleep(0.25)
 
 # Turn 180 degrees
 client.send('left run_to_rel_pos(-485)')
+time.sleep(0.1)
 client.send('right run_to_rel_pos(485)')
 
 time.sleep(4)
@@ -37,12 +48,10 @@ client.send('right change_rps(-0.25)')
 
 time.sleep(0.1)
 
-# Gets distance to voidness
-
+# Until we found an object we'll keep moving
 dist = us_sens01.get_lowest_reading()
 
-# Until we found an object we'll keep moving
-while abs(platform_dist-dist) > 15:
+while dist > 25:
     dist = us_sens01.get_lowest_reading()
 
 # Go forward to grab object
@@ -53,7 +62,7 @@ while True:
     dist = us_sens01.get_lowest_reading()
 
     # Object is beyong sight, needa recalibrate
-    if abs(platform_dist-dist) > 15:
+    if dist > 25:
         # Turn right a bit
         client.send('right run_to_rel_pos(-50)')
         client.send('left run_to_rel_pos(50)')
@@ -62,19 +71,28 @@ while True:
 
         dist = us_sens01.get_lowest_reading()
 
-        # Change 15 to something else
-        if abs(platform_dist-dist) > 15:
+        # If still not within sight, then turn other direction
+        if dist > 15:
             client.send('right run_to_rel_pos(-100)')
+            time.sleep(0.1)
             client.send('left run_to_rel_pos(100)')
             time.sleep(0.7)
 
         else:
-            print 'found object!'
+            client.send('stop')
+            break
 
+    # Found object
     elif dist <= 5:
-        print 'in front of object!'
         client.send('stop')
         break
 
-
+print 'found object!'
 client.send('stop')
+time.sleep(0.1)
+client.send('can_detected')
+time.sleep(12.5)
+servo.degrees_180()
+client.send('crane run_to_rel_pos(1750)')
+time.sleep(10)
+

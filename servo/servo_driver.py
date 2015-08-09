@@ -17,8 +17,8 @@ class servo_driver:
         # PWM runs at 50hz or 20ms
         self.pwm = GPIO.PWM(GPIO_port, 50)
 
-        # Stars pulse width modulation
-        self.pwm.start(7.5)
+        # Starts pulse width modulation
+        self.pwm.start(2.5)
 
     # Sets servo to 0 degrees
     def degrees_0(self):
