@@ -37,8 +37,8 @@ class server_tcp:
 
             # Add moving robocup arm here
             else:
-	        for i in self.data.split(';'):
-       		    translate(i)
+                translate(self.data)
+                #print self.data
 
     def __del__(self):
         # Close connection

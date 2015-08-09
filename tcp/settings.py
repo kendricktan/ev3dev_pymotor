@@ -9,8 +9,8 @@ OUTTER_MOTOR_AVOID_RPS = 0.775 # Decrease to increase circular radius
 INNER_MOTOR_AVOID_RPS = 0.375
 
 # Motor relative rotation to green lines
-MOTOR_ROTATION_GREEN = 145
-MOTOR_GREEN_FORWARD = 210
+MOTOR_ROTATION_GREEN = 107
+MOTOR_GREEN_FORWARD = 225
 
 ### Motor configuration ###
 motors = {}
@@ -21,7 +21,3 @@ motors['right'] = ev3dev_pymotor.ev3dev_pymotor('outB')
 
 motors['left'].set_rps(0.5)
 motors['right'].set_rps(0.5)
-
-# Extra motor to act as a crane
-motors['crane'] = ev3dev_pymotor.ev3dev_pymotor('outD')
-motors['crane'].set_rps(0.5)

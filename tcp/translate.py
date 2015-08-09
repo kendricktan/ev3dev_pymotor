@@ -5,38 +5,29 @@ import time
 def translate(raw_str):
     _str = raw_str.split()
 
-    if len(_str) == 0:
-        return
-
     # If not specify which motor
     # automatically assumes all motors
     # in list
     # Special functions will also be translated here
-
-    # Also we only wanna move left and right motors
-    # We don't wanna move crane unless specifically specified
     if len(_str) <= 1:
         if 'run_forever' in _str[0]:
     	    try:
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].run_forever()
+                    motors[motor].run_forever()
             except:
                 pass
 
         elif 'stop' in _str[0]:
             try:
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].stop()
+                    motors[motor].stop()
             except:
                 pass
 
         elif 'toggle' in _str[0]:
             try:
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].toggle()
+                    motors[motor].toggle()
             except:
                 pass
 
@@ -44,8 +35,7 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].set_rps(float(args))
+                    motors[motor].set_rps(float(args))
             except:
                 pass
 
@@ -53,8 +43,7 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].change_rps(float(args))
+                    motors[motor].change_rps(float(args))
             except:
                 pass
 
@@ -62,8 +51,7 @@ def translate(raw_str):
             try:
                 args = _str[0][_str[0].find('(')+1:_str[0].find(')')]
                 for motor in motors:
-                    if 'crane' not in motor:
-                        motors[motor].run_to_rel_pos(int(args))
+                    motors[motor].run_to_rel_pos(int(args))
             except:
                 pass
 
@@ -124,7 +112,6 @@ def translate(raw_str):
                 time.sleep(1.25)
 
                 # Rotate 45 degrees clockwise
-                '''
                 for motor in motors:
                     if 'left' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
@@ -132,7 +119,6 @@ def translate(raw_str):
                         motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
 
                 time.sleep(0.65)
-                '''
 
                 # Stop and set rps
                 for motor in motors:
@@ -166,13 +152,12 @@ def translate(raw_str):
                 time.sleep(1.25)
 
                 # Rotate 45 degrees anticlockwise
-                '''
                 for motor in motors:
                     if 'left' in motor:
                         motors[motor].run_to_rel_pos(-MOTOR_GREEN_FORWARD)
                     elif 'right' in motor:
                         motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-                '''
+
 
                 time.sleep(0.65)
 
@@ -184,159 +169,6 @@ def translate(raw_str):
                         motors[motor].set_rps(-0.25)
                     elif 'right' in motor:
                         motors[motor].set_rps(0.25)
-
-            except:
-                pass
-
-        ### Commands for crane operation ###
-        elif 'reverse_short' in _str[0]:
-            try:
-                motors['right'].run_to_rel_pos(-210)
-                motors['left'].run_to_rel_pos(-210)
-
-                time.sleep(2.5)
-
-            except:
-                pass
-
-        # Nudge crane to the right for a little bit
-        elif 'crane_nudge_right' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                motors['right'].run_to_rel_pos(-50)
-                motors['left'].run_to_rel_pos(50)
-
-                time.sleep(0.7)
-
-            except:
-                pass
-
-        # Nude crane to the left for a little bit
-        elif 'crane_nudge_left' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                motors['right'].run_to_rel_pos(50)
-                motors['left'].run_to_rel_pos(-50)
-
-                time.sleep(0.7)
-
-            except:
-                pass
-
-        # Strong nudge crane to the right
-        elif 'crane_s_nudge_right' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                motors['right'].run_to_rel_pos(-100)
-                motors['left'].run_to_rel_pos(100)
-
-                time.sleep(0.7)
-
-            except:
-                pass
-
-        # Strong nudge crane to the left
-        elif 'crane_s_nudge_left' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                motors['right'].run_to_rel_pos(100)
-                motors['left'].run_to_rel_pos(-100)
-
-                time.sleep(0.7)
-
-            except:
-                pass
-
-        # Slowly turns clockwise
-        elif 'clockwise_slow' in _str[0]:
-            try:
-                motors['left'].change_rps(0.25)
-                time.sleep(0.3)
-                motors['right'].change_rps(-0.25)
-                time.sleep(0.3)
-
-            except:
-                pass
-
-        # Slowly turns anticlockwise
-        elif 'clockwise_anti_slow' in _str[0]:
-            try:
-                motors['left'].change_rps(-0.25)
-                time.sleep(0.3)
-                motors['right'].change_rps(0.25)
-                time.sleep(0.3)
-
-            except:
-                pass
-
-        # Rotates 180 degrees
-        elif 'degrees_180' in _str[0]:
-            try:
-                # Sets constant speed
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                motors['left'].run_to_rel_pos(-490)
-                time.sleep(0.1)
-                motors['right'].run_to_rel_pos(490)
-
-                time.sleep(3.5)
-
-            except:
-                pass
-
-        # Crane grab can
-        elif 'can_detected' in _str[0]:
-            try:
-                # Sets standard RPS for motors
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                # 'Push' can into position
-                motors['right'].run_to_rel_pos(125)
-                motors['left'].run_to_rel_pos(125)
-                time.sleep(0.75)
-                motors['right'].run_to_rel_pos(-100)
-                motors['left'].run_to_rel_pos(-100)
-                time.sleep(0.55)
-
-                # Lower crane
-                motors['crane'].run_to_rel_pos(-1250)
-                time.sleep(5.5)
-
-                # 'Nudges' crane around in case it didn't land on can
-                motors['right'].run_to_rel_pos(50)
-                time.sleep(0.35)
-                motors['right'].run_to_rel_pos(-50)
-                time.sleep(0.35)
-
-                motors['left'].run_to_rel_pos(50)
-                time.sleep(0.35)
-                motors['left'].run_to_rel_pos(-50)
-                time.sleep(0.35)
-
-                # Continue lowering crane
-                motors['crane'].run_to_rel_pos(-500)
-
-                # Nudges can one final time
-                motors['right'].run_to_rel_pos(50)
-                time.sleep(0.35)
-                motors['right'].run_to_rel_pos(-50)
-                time.sleep(0.35)
-
-                motors['left'].run_to_rel_pos(50)
-                time.sleep(0.35)
-                motors['left'].run_to_rel_pos(-50)
-                time.sleep(0.35)
-
 
             except:
                 pass

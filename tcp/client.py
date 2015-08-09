@@ -37,10 +37,6 @@ class client_tcp:
     def set_msg(self, msg):
         self.MSG = msg
 
-    # Sends tcp packet with semi colon
-    # (in the event of packet delay in ev3dev)
-    def send(self, msg):
-        self.s.send(msg+';')
 
     def __del__(self):
         # Closes connection
