@@ -83,12 +83,11 @@ while True:
             client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
             client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
 
-        time.sleep(0.075)
-
+        time.sleep(0.5)
         # Starts over the blackline (if any)
         # Sleep helps provide consistent packet sending
         client.send('nudge_forward')
-        time.sleep(0.075)
+        time.sleep(1.5)
 
         # Sends robot in direction of the greenbox
         if 'left' in greenbox_location:
@@ -97,9 +96,11 @@ while True:
         elif 'right' in greenbox_location:
             client.send('clockwise_slow')
 
+        time.sleep(2.15)
+
         # This is merely a pattern formed in robocup 2015
         # that we're taking advantage of
-        while pi_img_procs.get_is_detected_black_line():
+        while pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()
 
         while not pi_img_procs.get_is_black_line_straight():

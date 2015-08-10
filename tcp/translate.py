@@ -103,7 +103,7 @@ def translate(raw_str):
             except:
                 pass
 
-        # Nuges forward just a bit
+        # Nugdes forward just a bit
         elif 'nudge_forward' in _str[0]:
             try:
                 for motor in motors:
@@ -112,8 +112,10 @@ def translate(raw_str):
 
                 time.sleep(0.075)
 
-                for motor in motors:
-                    motors[motor].run_to_rel_pos(145)
+
+                motors['left'].run_to_rel_pos(145)
+                time.sleep(0.1)
+                motors['right'].run_to_rel_pos(145)
 
                 time.sleep(1)
 
@@ -156,9 +158,9 @@ def translate(raw_str):
                     motors[motor].stop()
 
                     if 'left' in motor:
-                        motors[motor].set_rps(0.25)
+                        motors[motor].change_rps(0.25)
                     elif 'right' in motor:
-                        motors[motor].set_rps(-0.25)
+                        motors[motor].change_rps(-0.25)
 
             except:
                 pass
@@ -198,9 +200,9 @@ def translate(raw_str):
                     motors[motor].stop()
 
                     if 'left' in motor:
-                        motors[motor].set_rps(-0.25)
+                        motors[motor].change_rps(-0.25)
                     elif 'right' in motor:
-                        motors[motor].set_rps(0.25)
+                        motors[motor].change_rps(0.25)
 
             except:
                 pass

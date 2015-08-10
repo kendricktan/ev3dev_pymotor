@@ -20,7 +20,7 @@ PID_TOTAL = 0
 ERROR = 0
 
 # Motor speed
-MOTOR_RPS = 0.75 # rotations per scond
+MOTOR_RPS = 0.65 # rotations per scond
 MOTOR_RPS_MIN = -2.0
 # If line is on the right = negative value
 
@@ -33,12 +33,12 @@ THRESH = 90 # Change threshold to higher if can't detect line; Change to lower i
 AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
-ROIg_Y = CAMERA_HEIGHT-40
+ROIg_Y = CAMERA_HEIGHT-60
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([30, 170, 150], [60, 230, 215])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE = [([30, 165, 140], [80, 255, 215])] # HSV, use get_hsv.py to calibrate it
 GREEN_AREA_THRESH = 400 # Area of contour before officially recognizing it
-GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many
+GREEN_THRESH = 5 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
 # Used to determine if black line is straight (used for calibration after green box)
 BLACKLINE_MIN_X = CAMERA_WIDTH/2-(CAMERA_WIDTH/6)
