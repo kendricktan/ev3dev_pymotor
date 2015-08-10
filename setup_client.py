@@ -77,6 +77,9 @@ while True:
         # Gets greenbox location
         greenbox_location = pi_img_procs.get_greenbox_location()
 
+        while 'unknown' in greenbox_location:
+            greenbox_location=pi_img_procs.get_greenbox_location()
+
         # Goes slowly along blackline until passes the greenbox
         while pi_img_procs.get_is_greenbox():
             pi_img_procs.update()
@@ -106,7 +109,11 @@ while True:
         while not pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()
 
-        client.send('stop')
+        while pi_img_procs.get_is_greenbox():
+            pi_img_procs.update()
+            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*   100)/100)+')')
+            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*    100)/100)+')')
+
 
     # Updates camera feed
     pi_img_procs.update()

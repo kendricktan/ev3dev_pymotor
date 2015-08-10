@@ -59,7 +59,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
         ret, frame = self.cap.read()
@@ -375,13 +375,14 @@ class img_procs:
 
     def get_greenbox_location(self):
         # Gets global variables from settings.py
-        global GREEN_RANGE, GREEN_THRESH, MIDDLE, GREEN_AREA_THRESH
+        global GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, MIDDLE, GREEN_AREA_THRESH
 
         # Gets feed from camera
         ret, frame = self.cap.read()
 
         # Convert to HSV for more accurate reading
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        frame2 = frame
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -393,34 +394,46 @@ class img_procs:
             mask = cv2.inRange(frame, lower, upper)
             frame = cv2.bitwise_and(frame, frame, mask=mask)
 
+        # Green filter 2
+        for (lower, upper) in GREEN_RANGE_2:
+            lower = np.array(lower, dtype='uint8')
+            upper = np.array(upper, dtype='uint8')
+
+            mask = cv2.inRange(frame2, lower, upper)
+            frame2 = cv2.bitwise_and(frame2, frame2, mask=mask)
+
         # Converts ROI into grayscale
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
         # Apply threshold filter to smoothen edges and convert images to negative
         ret, frame = cv2.threshold(frame, GREEN_THRESH, 255, 0)
+        ret, frame2 = cv2.threshold(frame2, GREEN_THRESH, 255, 0)
 
         # Find contours
         contours, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours2, hierarchy = cv2.findContours(frame2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Finds out if greenbox is left or right
         right = 0
         left = 0
 
-        for i in contours:
-            area = cv2.contourArea(i)
+        for j in contours, contours2:
+            for i in j:
+                area = cv2.contourArea(i)
 
-            moments = cv2.moments(i)
+                moments = cv2.moments(i)
 
-            if area > GREEN_AREA_THRESH:
-                if moments['m00'] != 0.0:
-                    if moments['m01'] != 0.0:
-                        cx = int(moments['m10']/moments['m00'])
-                        cy = int(moments['m01']/moments['m00'])
+                if area > GREEN_AREA_THRESH:
+                    if moments['m00'] != 0.0:
+                        if moments['m01'] != 0.0:
+                            cx = int(moments['m10']/moments['m00'])
+                            cy = int(moments['m01']/moments['m00'])
 
-                        if cx > MIDDLE:
-                            right = right + 1
-                        else:
-                            left = left + 1
+                            if cx > MIDDLE:
+                                right = right + 1
+                            else:
+                                left = left + 1
 
         if right > left:
             return 'right'
