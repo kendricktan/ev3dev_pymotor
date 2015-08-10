@@ -87,25 +87,15 @@ while True:
 
         # Starts over the blackline (if any)
         # Sleep helps provide consistent packet sending
-        client.send('stop')
-        time.sleep(0.075)
-        client.send('set_rps(0.75)')
-        time.sleep(0.075)
-        client.send('run_to_rel_pos(145)')
-        time.sleep(1)
-        client.send('stop')
+        client.send('nudge_forward')
         time.sleep(0.075)
 
         # Sends robot in direction of the greenbox
         if 'left' in greenbox_location:
-            client.send('left change_rps(-0.25)')
-            time.sleep(0.075)
-            client.send('right change_rps(0.25)')
+            client.send('clockwise_anti_slow')
 
         elif 'right' in greenbox_location:
-            client.send('right change_rps(-0.25)')
-            time.sleep(0.075)
-            client.send('left change_rps(0.25)')
+            client.send('clockwise_slow')
 
         # This is merely a pattern formed in robocup 2015
         # that we're taking advantage of

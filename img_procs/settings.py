@@ -29,14 +29,14 @@ ROI_Y = 120
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 100 # Change threshold to higher if can't detect line; Change to lower if detects too many
-AREA_THRESH = 1250 # Minimum area before it's considered to be a black line
+THRESH = 90 # Change threshold to higher if can't detect line; Change to lower if detects too many
+AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
 ROIg_Y = CAMERA_HEIGHT-40
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([55, 75, 105], [85, 145, 185])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE = [([30, 170, 150], [60, 230, 215])] # HSV, use get_hsv.py to calibrate it
 GREEN_AREA_THRESH = 400 # Area of contour before officially recognizing it
 GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 

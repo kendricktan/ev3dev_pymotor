@@ -103,6 +103,23 @@ def translate(raw_str):
             except:
                 pass
 
+        # Nuges forward just a bit
+        elif 'nudge_forward' in _str[0]:
+            try:
+                for motor in motors:
+                    motors[motor].stop()
+                    motors[motor].set_rps(0.75)
+
+                time.sleep(0.075)
+
+                for motor in motors:
+                    motors[motor].run_to_rel_pos(145)
+
+                time.sleep(1)
+
+            except:
+                pass
+
         # Command to move towards green blocks
         elif 'green_at_right' in _str[0]:
             try:
