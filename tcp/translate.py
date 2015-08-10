@@ -112,8 +112,8 @@ def translate(raw_str):
 
                 time.sleep(0.075)
 
-                for motor in motors:
-                    motors[motor].run_to_rel_pos(145)
+                motors['left'].run_to_rel_pos(100)
+                motors['right'].run_to_rel_pos(100)
 
                 time.sleep(1)
 
@@ -175,10 +175,10 @@ def translate(raw_str):
                 # Move just slightly up
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                 time.sleep(1.25)
 
@@ -186,9 +186,9 @@ def translate(raw_str):
                 '''
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_GREEN_FORWARD)
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
                 '''
 
                 time.sleep(0.65)
@@ -198,9 +198,9 @@ def translate(raw_str):
                     motors[motor].stop()
 
                     if 'left' in motor:
-                        motors[motor].set_rps(-0.25)
+                        motors[motor].change_rps(-0.25)
                     elif 'right' in motor:
-                        motors[motor].set_rps(0.25)
+                        motors[motor].change_rps(0.25)
 
             except:
                 pass
