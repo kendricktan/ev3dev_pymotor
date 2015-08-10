@@ -9,7 +9,7 @@ OUTTER_MOTOR_AVOID_RPS = 0.775 # Decrease to increase circular radius
 INNER_MOTOR_AVOID_RPS = 0.375
 
 # Motor relative rotation to green lines
-MOTOR_ROTATION_GREEN = 145
+MOTOR_ROTATION_GREEN = 100
 MOTOR_GREEN_FORWARD = 210
 
 ### Motor configuration ###

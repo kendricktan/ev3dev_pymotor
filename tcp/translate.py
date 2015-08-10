@@ -112,10 +112,15 @@ def translate(raw_str):
 
                 time.sleep(0.075)
 
+<<<<<<< HEAD
 
                 motors['left'].run_to_rel_pos(145)
                 time.sleep(0.1)
                 motors['right'].run_to_rel_pos(145)
+=======
+                motors['left'].run_to_rel_pos(100)
+                motors['right'].run_to_rel_pos(100)
+>>>>>>> d3c9a04fb94690f0f44f5e7431337c1bddaf877d
 
                 time.sleep(1)
 
@@ -177,10 +182,10 @@ def translate(raw_str):
                 # Move just slightly up
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(220)
+                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
 
                 time.sleep(1.25)
 
@@ -188,9 +193,9 @@ def translate(raw_str):
                 '''
                 for motor in motors:
                     if 'left' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_GREEN_FORWARD)
+                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
                     elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
+                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
                 '''
 
                 time.sleep(0.65)
