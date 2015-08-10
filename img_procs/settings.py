@@ -37,6 +37,7 @@ ROIg_Y = CAMERA_HEIGHT-60
 
 GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([30, 165, 140], [80, 255, 215])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE_2 = [([0, 0, 0], [0, 0, 0])]
 GREEN_AREA_THRESH = 400 # Area of contour before officially recognizing it
 GREEN_THRESH = 5 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
