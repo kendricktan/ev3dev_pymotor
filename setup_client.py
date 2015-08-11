@@ -109,7 +109,10 @@ while True:
         while not pi_img_procs.get_is_black_line_straight():
             pi_img_procs.update()
 
-        while pi_img_procs.get_is_greenbox():
+        green_time = time.time()
+
+        # Follow blackline if we immediately see a greenbox
+        while pi_img_procs.get_is_greenbox() or time.time() - green_time < 0.5:
             pi_img_procs.update()
             client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*   100)/100)+')')
             client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*    100)/100)+')')

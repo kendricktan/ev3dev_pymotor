@@ -40,7 +40,7 @@ THRESH = 125 # Change threshold to higher if can't detect line; Change to lower 
 AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
-ROIg_Y = CAMERA_HEIGHT-60
+ROIg_Y = CAMERA_HEIGHT-90
 
 GREEN_P_VAL = 0.83 # PID for green val
 GREEN_RANGE = [([45, 90, 170], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it

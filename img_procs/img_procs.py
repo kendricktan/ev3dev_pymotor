@@ -102,7 +102,7 @@ class img_procs:
         # Black line ROI
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         # Greenbox ROIs
-        ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
+        ROIg = frame [ROIg_Y:CAMERA_HEIGHT-30, 0:320]
 
         # Aluminium ROI
         ROIa = frame [0:ROIa_Y, 0:320]
