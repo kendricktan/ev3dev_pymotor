@@ -10,16 +10,16 @@ CAMERA_AWB_MODE = 'off' # Autowhite balance
 CAMERA_AWB_GAINS = (Fraction(101, 64), Fraction(323, 256))
 
 # PID
-KP = 0.0035
-KI = 0.0045
-KD = 0.008
+KP = 0.0055
+KI = 0.002
+KD = 0.0035
 DERIVATOR = 0
 
 P_VAL = 0
 I_VAL = 0
 D_VAL = 0
 
-I_MAX = 0.01359
+I_MAX = 0.0137
 I_MIN = -I_MAX
 
 PID_TOTAL = 0
@@ -27,8 +27,8 @@ PID_TOTAL = 0
 ERROR = 0
 
 # Motor speed
-MOTOR_RPS = 0.55 # rotations per second
-MOTOR_RPS_MIN = -2.0
+MOTOR_RPS = 0.65 # rotations per second
+MOTOR_RPS_MIN = -MOTOR_RPS
 # If line is on the right = negative value
 
 # ROI Settings
@@ -43,7 +43,7 @@ AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 ROIg_Y = CAMERA_HEIGHT-60
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([45, 90, 195], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE = [([45, 90, 170], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it
 GREEN_RANGE_2 = [([0, 0, 0], [0, 0, 0])]
 GREEN_AREA_THRESH = 200 # Area of contour before officially recognizing it
 GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many

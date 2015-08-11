@@ -86,7 +86,7 @@ class img_procs:
     # to obtain motor rotation RPS
     def update(self):
         # Define our global variables from settings.py
-        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+        global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # reset the stream before the next capture
         self.stream.seek(0)
@@ -103,14 +103,12 @@ class img_procs:
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
         # Greenbox ROIs
         ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
-        ROIg2 = ROIg
 
         # Aluminium ROI
         ROIa = frame [0:ROIa_Y, 0:320]
 
         # Convert to HSV for more accurate reading
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
-        ROIg2 = ROIg
         ROIa = cv2.cvtColor(ROIa, cv2.COLOR_BGR2HSV)
 
         # First Green filter
@@ -123,14 +121,6 @@ class img_procs:
             mask = cv2.inRange(ROIg, lower, upper)
             ROIg = cv2.bitwise_and(ROIg, ROIg, mask=mask)
 
-        # Second green filter
-        for (lower, upper) in GREEN_RANGE_2:
-            lower = np.array(lower, dtype='uint8')
-            upper = np.array(upper, dtype='uint8')
-
-            mask = cv2.inRange(ROIg2, lower, upper)
-            ROIg2 = cv2.bitwise_and(ROIg2, ROIg2, mask=mask)
-
         # Aluminium filter
         for (lower, upper) in ALUMINIUM_RANGE:
             lower = np.array(lower, dtype='uint8')
@@ -142,7 +132,6 @@ class img_procs:
         # Converts ROI's into Grayscale
         im_ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2GRAY)
         im_ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2GRAY)
-        im_ROIg2 = cv2.cvtColor(ROIg2, cv2.COLOR_BGR2GRAY)
         im_ROIa = cv2.cvtColor(ROIa, cv2.COLOR_BGR2GRAY)
 
         # Apply Threshold filter to smoothen edges and convert images to negative
@@ -150,7 +139,6 @@ class img_procs:
         cv2.bitwise_not(im_ROI, im_ROI)
 
         ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
-        ret, im_ROIg2 = cv2.threshold(im_ROIg2, GREEN_THRESH, 255, 0)
         ret, im_ROIa = cv2.threshold(im_ROIa, ALUMINIUM_THRESH, 255, 0)
         # Do NOT bitwise_not im_ROIg or im_ROIa
 
@@ -168,7 +156,6 @@ class img_procs:
         if self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI.copy(),cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg.copy() ,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contoursg2, hierarchy = cv2.findContours(im_ROIg2.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contoursa, hierarchy = cv2.findContours(im_ROIa.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # if we don't want to see the gui we don't do that
@@ -176,7 +163,6 @@ class img_procs:
         elif not self.is_show_gui:
             contours, hierarchy = cv2.findContours(im_ROI,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             contoursg, hierarchy = cv2.findContours(im_ROIg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-            contoursg2, hierarchy = cv2.findContours(im_ROIg2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             contoursa, hierarchy = cv2.findContours(im_ROIa, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # List to store INTERESTED contour_coordinates
@@ -225,38 +211,37 @@ class img_procs:
         self.is_prev_green_detected = False
 
         # Green contour finder in green ROI
-        for j in contoursg, contoursg2:
-            for i in j:
-                area = cv2.contourArea(i)
-                moments = cv2.moments(i)
+        for i in contoursg:
+            area = cv2.contourArea(i)
+            moments = cv2.moments(i)
 
-                if area > GREEN_AREA_THRESH:
-                    if moments['m00'] != 0.0:
-                        if moments['m01'] != 0.0:
-                            cx = int(moments['m10']/moments['m00'])
-                            cy = int(moments['m01']/moments['m00'])
+            if area > GREEN_AREA_THRESH:
+                if moments['m00'] != 0.0:
+                    if moments['m01'] != 0.0:
+                        cx = int(moments['m10']/moments['m00'])
+                        cy = int(moments['m01']/moments['m00'])
 
-                            # If we're showing our GUI
-                            # needa indicate where we found
-                            # the green box
-                            if self.is_show_gui:
-                                cv2.circle(frame, (cx, cy+ROIg_Y), 4, GREEN_COLOR, -1)
-                                cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (0,255,0),2)
+                        # If we're showing our GUI
+                        # needa indicate where we found
+                        # the green box
+                        if self.is_show_gui:
+                            cv2.circle(frame, (cx, cy+ROIg_Y), 4, GREEN_COLOR, -1)
+                            cv2.putText(frame,'Area ROIg :' + str(area),(10, 170), cv2.FONT_HERSHEY_PLAIN, 1, (0,255,0),2)
 
                             # If we have previously found a green region
-                            if greenbox_x_location != -1:
-                                # Since green is indicative of where we wanna travel,
-                                # we'll calculate the PID from the contour
-                                # furthest away from center
-                                if abs(MIDDLE-cx) >= abs(MIDDLE-greenbox_x_location):
-                                    # We only care about the x coordinates
-                                    greenbox_x_location = cx
-
-                            else:
+                        if greenbox_x_location != -1:
+                            # Since green is indicative of where we wanna travel,
+                            # we'll calculate the PID from the contour
+                            # furthest away from center
+                            if abs(MIDDLE-cx) >= abs(MIDDLE-greenbox_x_location):
+                                # We only care about the x coordinates
                                 greenbox_x_location = cx
 
-                            # We have detected a green box
-                            self.is_prev_green_detected = True
+                        else:
+                            greenbox_x_location = cx
+
+                        # We have detected a green box
+                        self.is_prev_green_detected = True
 
         # Sets is blackline straight boolean var
         # Used for calibration AFTER green box
@@ -385,7 +370,6 @@ class img_procs:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
 
-        time.sleep(0.01)
 
     def show_which_img(self, enum_var):
         self.img_enum = enum_var
@@ -423,7 +407,6 @@ class img_procs:
 
         # Convert to HSV for more accurate reading
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        frame2 = frame
 
         # Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -435,46 +418,34 @@ class img_procs:
             mask = cv2.inRange(frame, lower, upper)
             frame = cv2.bitwise_and(frame, frame, mask=mask)
 
-        # Green filter 2
-        for (lower, upper) in GREEN_RANGE_2:
-            lower = np.array(lower, dtype='uint8')
-            upper = np.array(upper, dtype='uint8')
-
-            mask = cv2.inRange(frame2, lower, upper)
-            frame2 = cv2.bitwise_and(frame2, frame2, mask=mask)
-
         # Converts ROI into grayscale
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
         # Apply threshold filter to smoothen edges and convert images to negative
         ret, frame = cv2.threshold(frame, GREEN_THRESH, 255, 0)
-        ret, frame2 = cv2.threshold(frame2, GREEN_THRESH, 255, 0)
 
         # Find contours
         contours, hierarchy = cv2.findContours(frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contours2, hierarchy = cv2.findContours(frame2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Finds out if greenbox is left or right
         right = 0
         left = 0
 
-        for j in contours, contours2:
-            for i in j:
-                area = cv2.contourArea(i)
+        for i in contours:
+            area = cv2.contourArea(i)
 
-                moments = cv2.moments(i)
+            moments = cv2.moments(i)
 
-                if area > GREEN_AREA_THRESH:
-                    if moments['m00'] != 0.0:
-                        if moments['m01'] != 0.0:
-                            cx = int(moments['m10']/moments['m00'])
-                            cy = int(moments['m01']/moments['m00'])
+            if area > GREEN_AREA_THRESH:
+                if moments['m00'] != 0.0:
+                    if moments['m01'] != 0.0:
+                        cx = int(moments['m10']/moments['m00'])
+                        cy = int(moments['m01']/moments['m00'])
 
-                            if cx > MIDDLE:
-                                right = right + 1
-                            else:
-                                left = left + 1
+                        if cx > MIDDLE:
+                            right = right + 1
+                        else:
+                            left = left + 1
 
         if right > left:
             return 'right'
