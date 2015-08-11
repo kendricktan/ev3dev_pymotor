@@ -6,6 +6,7 @@ sys.path.append('/usr/local/lib/python2.7/site-packages')
 # Loads the module for pi camera
 os.system('sudo modprobe bcm2835-v4l2')
 
+import picamera
 import math
 import socket
 import cv2
@@ -17,12 +18,30 @@ class img_procs:
     def __init__(self):
         global CAMERA_WIDTH, CAMERA_HEIGHT
 
+        # Calls pi camera module
+        self.camera = picamera.PiCamera()
+        
+        # Gets video stream from pi camera module
+        self.stream = picamera.array.PiRGBArray(self.camera)
+        
+        # Setup raspi camera settings
+        self.camera.resolution = (CAMERA_WIDTH, CAMERA_HEIGHT)
+                
+        # Wait for automatic gain control to settle
+        time.sleep(2)
+        # Now fix the values
+        self.camera.shutter_speed = self.camera.exposure_speed
+        self.camera.exposure_mode = 'off'
+        g = self.camera.awb_gains
+        self.camera.awb_mode = 'off'
+        self.camera.awb_gains = g                
+        
         # Get pi camera stream
-        self.cap = cv2.VideoCapture(0)
+        #self.cap = cv2.VideoCapture(0) # Not using opencv as it doesn't support disabling white balance (which screws up the color detection)
 
         # Sets the resolution of the stream
-        self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-        self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+        #self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+        #self.cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
         # Does it show the GUI by default
         self.is_show_gui = False
@@ -62,7 +81,9 @@ class img_procs:
         global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
 
         # Gets frame from capture device
-        ret, frame = self.cap.read()
+        #ret, frame = self.cap.read()
+        self.camera.capture(self.stream, 'bgr', use_video_port=True)
+        frame = self.stream.array
 
         # Define our regions of interest
         # Black line ROI
@@ -351,6 +372,10 @@ class img_procs:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
 
+        # reset the stream before the next capture
+        self.stream.seek(0)
+        self.stream.truncate()
+            
         time.sleep(0.01)
 
     def show_which_img(self, enum_var):
@@ -378,7 +403,9 @@ class img_procs:
         global GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, MIDDLE, GREEN_AREA_THRESH
 
         # Gets feed from camera
-        ret, frame = self.cap.read()
+        #ret, frame = self.cap.read()
+        self.camera.capture(self.stream, 'bgr', use_video_port=True)
+        frame = self.stream.array
 
         # Convert to HSV for more accurate reading
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -461,6 +488,8 @@ class img_procs:
         return self.lmotor_cmd
 
     def __del__(self):
-        self.cap.release()
+        #self.cap.release()
+        self.stream.close()
+        self.camera.close()
         cv2.destroyAllWindows()
 
