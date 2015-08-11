@@ -7,6 +7,7 @@ sys.path.append('/usr/local/lib/python2.7/site-packages')
 os.system('sudo modprobe bcm2835-v4l2')
 
 import picamera
+import picamera.array
 import math
 import socket
 import cv2
@@ -20,13 +21,13 @@ class img_procs:
 
         # Calls pi camera module
         self.camera = picamera.PiCamera()
-        
+
         # Gets video stream from pi camera module
         self.stream = picamera.array.PiRGBArray(self.camera)
-        
+
         # Setup raspi camera settings
         self.camera.resolution = (CAMERA_WIDTH, CAMERA_HEIGHT)
-                
+
         # Wait for automatic gain control to settle
         time.sleep(2)
         # Now fix the values
@@ -34,8 +35,8 @@ class img_procs:
         self.camera.exposure_mode = 'off'
         g = self.camera.awb_gains
         self.camera.awb_mode = 'off'
-        self.camera.awb_gains = g                
-        
+        self.camera.awb_gains = g
+
         # Get pi camera stream
         #self.cap = cv2.VideoCapture(0) # Not using opencv as it doesn't support disabling white balance (which screws up the color detection)
 
@@ -375,7 +376,7 @@ class img_procs:
         # reset the stream before the next capture
         self.stream.seek(0)
         self.stream.truncate()
-            
+
         time.sleep(0.01)
 
     def show_which_img(self, enum_var):
