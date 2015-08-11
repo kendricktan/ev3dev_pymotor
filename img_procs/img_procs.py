@@ -6,6 +6,7 @@ sys.path.append('/usr/local/lib/python2.7/site-packages')
 # Loads the module for pi camera
 os.system('sudo modprobe bcm2835-v4l2')
 
+from fractions import Fraction
 import picamera
 import picamera.array
 import math
@@ -17,10 +18,11 @@ from settings import *
 
 class img_procs:
     def __init__(self):
-        global CAMERA_WIDTH, CAMERA_HEIGHT
+        global CAMERA_WIDTH, CAMERA_HEIGHT, CAMERA_SHUTTER_SPEED, CAMERA_EXPOSURE_MODE, CAMERA_AWB_MODE, CAMERA_AWB_GAINS
 
         # Calls pi camera module
         self.camera = picamera.PiCamera()
+        self.camera.framerate = 90
 
         # Gets video stream from pi camera module
         self.stream = picamera.array.PiRGBArray(self.camera)
@@ -30,12 +32,17 @@ class img_procs:
 
         # Wait for automatic gain control to settle
         time.sleep(2)
+
         # Now fix the values
-        self.camera.shutter_speed = self.camera.exposure_speed
-        self.camera.exposure_mode = 'off'
-        g = self.camera.awb_gains
-        self.camera.awb_mode = 'off'
-        self.camera.awb_gains = g
+        #print 'camera.exposure_speed: ' + str(self.camera.exposure_speed)
+        #print 'camera.shutter_speed: ' + str(self.camera.exposure_speed)
+        #print 'camera.awb_gains: ' + str(self.camera.awb_gains)
+        self.camera.shutter_speed = CAMERA_SHUTTER_SPEED#self.camera.exposure_speed
+        self.camera.exposure_mode = CAMERA_EXPOSURE_MODE
+        #g = self.camera.awb_gains
+        #print g
+        self.camera.awb_mode = CAMERA_AWB_MODE
+        self.camera.awb_gains = CAMERA_AWB_GAINS
 
         # Get pi camera stream
         #self.cap = cv2.VideoCapture(0) # Not using opencv as it doesn't support disabling white balance (which screws up the color detection)
@@ -80,6 +87,11 @@ class img_procs:
     def update(self):
         # Define our global variables from settings.py
         global CAMERA_WIDTH, CAMERA_HEIGHT, KP, KI, KD, DERIVATOR, P_VAL, I_VAL, D_VAL, I_MAX, I_MIN, PID_TOTAL, ERROR, MOTOR_RPS, MOTOR_RPS_MIN, ROI_Y, MIDDLE, THRESH, AREA_THRESH, ROIg_Y, GREEN_P_VAL, GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, GREEN_AREA_THRESH, ROIa_Y, ALUMINIUM_RANGE, ALUMINIUM_AREA_THRESH, ALUMINIUM_THRESH, US_MIN_DIST, RED_COLOR, GREEN_COLOR, BLUE_COLOR, YELLOW_COLOR
+
+        # reset the stream before the next capture
+        self.stream.seek(0)
+        self.stream.truncate()
+
 
         # Gets frame from capture device
         #ret, frame = self.cap.read()
@@ -373,10 +385,6 @@ class img_procs:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.__del__()
 
-        # reset the stream before the next capture
-        self.stream.seek(0)
-        self.stream.truncate()
-
         time.sleep(0.01)
 
     def show_which_img(self, enum_var):
@@ -402,6 +410,11 @@ class img_procs:
     def get_greenbox_location(self):
         # Gets global variables from settings.py
         global GREEN_RANGE, GREEN_RANGE_2, GREEN_THRESH, MIDDLE, GREEN_AREA_THRESH
+
+        # reset the stream before the next capture
+        self.stream.seek(0)
+        self.stream.truncate()
+
 
         # Gets feed from camera
         #ret, frame = self.cap.read()
@@ -467,6 +480,10 @@ class img_procs:
             return 'right'
         elif left > right:
             return 'left'
+
+        # reset the stream before the next capture
+        self.stream.seek(0)
+        self.stream.truncate()
 
         return 'unknown'
 

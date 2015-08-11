@@ -17,15 +17,14 @@ with picamera.PiCamera() as camera:
     with picamera.array.PiRGBArray(camera) as stream:
 
         camera.resolution = (320, 240)
-        camera.framerate = 30
+        camera.framerate = 90
 
         time.sleep(2)
         # Now fix the values
-        camera.shutter_speed = camera.exposure_speed
-        camera.exposure_mode = 'off'
-        g = camera.awb_gains
-        camera.awb_mode = 'off'
-        camera.awb_gains = g
+        camera.shutter_speed = CAMERA_SHUTTER_SPEED
+        camera.exposure_mode = CAMERA_EXPOSURE_MODE
+        camera.awb_mode = CAMERA_AWB_MODE
+        camera.awb_gains = CAMERA_AWB_GAINS
 
         while True:
             camera.capture(stream, format='bgr', use_video_port=True)

@@ -1,10 +1,17 @@
+from fractions import Fraction
+
 # Image settings
 CAMERA_WIDTH = 320
 CAMERA_HEIGHT = 240
 
+CAMERA_EXPOSURE_MODE = 'off'
+CAMERA_SHUTTER_SPEED = 10096
+CAMERA_AWB_MODE = 'off' # Autowhite balance
+CAMERA_AWB_GAINS = (Fraction(101, 64), Fraction(323, 256))
+
 # PID
-KP = 0.0065
-KI = 0.0055
+KP = 0.0035
+KI = 0.0045
 KD = 0.008
 DERIVATOR = 0
 
@@ -20,7 +27,7 @@ PID_TOTAL = 0
 ERROR = 0
 
 # Motor speed
-MOTOR_RPS = 0.75 # rotations per second
+MOTOR_RPS = 0.55 # rotations per second
 MOTOR_RPS_MIN = -2.0
 # If line is on the right = negative value
 
@@ -29,15 +36,15 @@ ROI_Y = 120
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 100 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 105 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
 ROIg_Y = CAMERA_HEIGHT-60
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([30, 140, 150], [80, 255, 210])] # HSV, use get_hsv.py to calibrate it
-GREEN_RANGE_2 = [([30, 100, 150], [80, 120, 215])]
+GREEN_RANGE = [([45, 90, 195], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it
+GREEN_RANGE_2 = [([0, 0, 0], [0, 0, 0])]
 GREEN_AREA_THRESH = 200 # Area of contour before officially recognizing it
 GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
