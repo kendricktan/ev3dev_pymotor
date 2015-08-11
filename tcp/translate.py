@@ -69,40 +69,6 @@ def translate(raw_str):
 
         ### Special commands ###
 
-        # Turns 90 degrees anti clockwise
-        elif 'anticlockwise_90' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                    # Assuming motor has 'left' motor
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
-
-                # Allows motors to finish executing command before continuing
-                time.sleep(1.85)
-
-            except:
-                pass
-
-        # Turns 90 degrees clockwise
-        elif 'clockwise_90' in _str[0]:
-            try:
-                for motor in motors:
-                    motors[motor].set_rps(0.75)
-
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_TO_90_DEGREES)
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_TO_90_DEGREES)
-
-                time.sleep(1.85)
-
-            except:
-                pass
-
         # Nugdes forward just a bit
         elif 'nudge_forward' in _str[0]:
             try:
@@ -112,102 +78,11 @@ def translate(raw_str):
 
                 time.sleep(0.075)
 
-<<<<<<< HEAD
 
-                motors['left'].run_to_rel_pos(145)
-                time.sleep(0.1)
-                motors['right'].run_to_rel_pos(145)
-=======
-                motors['left'].run_to_rel_pos(100)
-                motors['right'].run_to_rel_pos(100)
->>>>>>> d3c9a04fb94690f0f44f5e7431337c1bddaf877d
+                motors['left'].run_to_rel_pos(105)
+                motors['right'].run_to_rel_pos(105)
 
                 time.sleep(1)
-
-            except:
-                pass
-
-        # Command to move towards green blocks
-        elif 'green_at_right' in _str[0]:
-            try:
-                # Stops motor and sets RPS
-                for motor in motors:
-                    motors[motor].stop()
-                    motors[motor].set_rps(0.75)
-
-                time.sleep(0.25)
-
-                # Move just slightly up
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-
-                time.sleep(1.25)
-
-                # Rotate 45 degrees clockwise
-                '''
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
-
-                time.sleep(0.65)
-                '''
-
-                # Stop and set rps
-                for motor in motors:
-                    motors[motor].stop()
-
-                    if 'left' in motor:
-                        motors[motor].change_rps(0.25)
-                    elif 'right' in motor:
-                        motors[motor].change_rps(-0.25)
-
-            except:
-                pass
-
-        elif 'green_at_left' in _str[0]:
-            try:
-                # Stops motor and sets RPS
-                for motor in motors:
-                    motors[motor].stop()
-                    motors[motor].set_rps(0.75)
-
-                time.sleep(0.25)
-
-                # Move just slightly up
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_GREEN_FORWARD)
-
-                time.sleep(1.25)
-
-                # Rotate 45 degrees anticlockwise
-                '''
-                for motor in motors:
-                    if 'left' in motor:
-                        motors[motor].run_to_rel_pos(-MOTOR_ROTATION_GREEN)
-                    elif 'right' in motor:
-                        motors[motor].run_to_rel_pos(MOTOR_ROTATION_GREEN)
-                '''
-
-                time.sleep(0.65)
-
-                # Stop and set low rps
-                for motor in motors:
-                    motors[motor].stop()
-
-                    if 'left' in motor:
-                        motors[motor].change_rps(-0.25)
-                    elif 'right' in motor:
-                        motors[motor].change_rps(0.25)
 
             except:
                 pass
@@ -283,9 +158,9 @@ def translate(raw_str):
         elif 'clockwise_slow' in _str[0]:
             try:
                 motors['left'].change_rps(0.25)
-                time.sleep(0.3)
+                time.sleep(0.075)
                 motors['right'].change_rps(-0.25)
-                time.sleep(0.3)
+                time.sleep(0.075)
 
             except:
                 pass
@@ -294,9 +169,9 @@ def translate(raw_str):
         elif 'clockwise_anti_slow' in _str[0]:
             try:
                 motors['left'].change_rps(-0.25)
-                time.sleep(0.3)
+                time.sleep(0.075)
                 motors['right'].change_rps(0.25)
-                time.sleep(0.3)
+                time.sleep(0.075)
 
             except:
                 pass
@@ -309,7 +184,7 @@ def translate(raw_str):
                     motors[motor].set_rps(0.75)
 
                 motors['left'].run_to_rel_pos(-490)
-                time.sleep(0.1)
+                time.sleep(0.05)
                 motors['right'].run_to_rel_pos(490)
 
                 time.sleep(3.5)
