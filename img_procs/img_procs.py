@@ -106,7 +106,7 @@ class img_procs:
         ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
 
         # Aluminium ROI
-        ROIa = frame [0:ROIa_Y, 0:320]
+        ROIa = frame [(CAMERA_HEIGHT/2)-(ROIa_Y/2):(CAMERA_HEIGHT/2)+(ROIa_Y/2), 0:320]
 
         # Convert to HSV for more accurate reading
         ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2HSV)
@@ -284,7 +284,7 @@ class img_procs:
                         self.is_aluminium_found = True
 
                         if self.is_show_gui:
-                            cv2.circle(frame, (cx, cy), 4, YELLOW_COLOR, -1)
+                            cv2.circle(frame, (cx, cy+(CAMERA_HEIGHT/2)-(ROIa_Y/2)), 4, YELLOW_COLOR, -1)
                             cv2.putText(frame, 'Aluminium found!', (10, 75), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255), 2)
 
         # PID code
@@ -467,7 +467,7 @@ class img_procs:
         self.stream.truncate()
 
         return 'unknown'
-        
+
     def get_is_aluminium_found(self):
         return self.is_aluminium_found
 

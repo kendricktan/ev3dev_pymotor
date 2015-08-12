@@ -128,7 +128,7 @@ while True:
         # Repositions itself so its straight
         alum_detect_time = time.time()
 
-        while time.time()-alum_detect_time < 1:
+        while time.time()-alum_detect_time < 2:
             pi_img_procs.update()
             # Motor values are inverted as we're travelling backwards
             client.send('right change_rps(-'+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
@@ -154,7 +154,7 @@ while True:
 
         # Turn 180 degrees
         client.send('degrees_180')
-        time.sleep(5.6)
+        time.sleep(3)
 
         # Begin turning anti-clockwise/clockwise slowly based on can's position
         if 'left' in CAN_RELATIVE_POSITION:
