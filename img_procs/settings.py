@@ -33,10 +33,10 @@ MOTOR_RPS_MIN = -MOTOR_RPS
 
 # ROI Settings
 ROI_Y = 120
-
+BLACK_RANGE = [([25, 30, 20], [80, 115, 125])]
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 122 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 22 # Change threshold to lower if can't detect line; Change to higher if detects too many
 AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding

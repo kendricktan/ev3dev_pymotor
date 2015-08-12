@@ -109,8 +109,17 @@ class img_procs:
         ROIa = frame [0:ROIa_Y, 0:320]
 
         # Convert to HSV for more accurate reading
+        ROI = cv2.cvtColor(ROI, cv2.COLOR_BGR2HSV)
         ROIg = cv2.cvtColor(ROIg, cv2.COLOR_BGR2HSV)
         ROIa = cv2.cvtColor(ROIa, cv2.COLOR_BGR2HSV)
+
+        # Black filter
+        for (lower, upper) in BLACK_RANGE:
+            lower = np.array(lower, dtype='uint8')
+            upper = np.array(upper, dtype='uint8')
+
+            mask = cv2.inRange(ROI, lower, upper)
+            ROI = cv2.bitwise_and(ROI, ROI, mask=mask)
 
         # First Green filter
         for (lower, upper) in GREEN_RANGE:
@@ -137,7 +146,7 @@ class img_procs:
 
         # Apply Threshold filter to smoothen edges and convert images to negative
         ret, im_ROI = cv2.threshold(im_ROI, THRESH, 255, 0)
-        cv2.bitwise_not(im_ROI, im_ROI)
+        #cv2.bitwise_not(im_ROI, im_ROI)
 
         ret, im_ROIg = cv2.threshold(im_ROIg, GREEN_THRESH, 255, 0)
         ret, im_ROIa = cv2.threshold(im_ROIa, ALUMINIUM_THRESH, 255, 0)
