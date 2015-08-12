@@ -53,7 +53,7 @@ BLACKLINE_MAX_X = CAMERA_WIDTH/2+(CAMERA_WIDTH/12)
 
 # Used to detect aluminium foil
 ROIa_Y = 40 #0 till this value
-ALUMINIUM_RANGE = [([3, 230, 80], [40, 255, 120])]
+ALUMINIUM_RANGE = [([25, 130, 10], [45, 180, 40])]
 ALUMINIUM_AREA_THRESH = 350
 ALUMINIUM_THRESH = 50 # Change to lower if can't detect line; change to higher if detects too many
 
