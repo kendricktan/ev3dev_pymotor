@@ -2,6 +2,7 @@ import cv, cv2
 import time
 import picamera
 import picamera.array
+from settings import *
 
 x_co = 0
 y_co = 0

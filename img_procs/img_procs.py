@@ -31,7 +31,7 @@ class img_procs:
         self.camera.resolution = (CAMERA_WIDTH, CAMERA_HEIGHT)
 
         # Wait for automatic gain control to settle
-        time.sleep(2)
+        time.sleep(0.25)
 
         # Now fix the values
         #print 'camera.exposure_speed: ' + str(self.camera.exposure_speed)
@@ -101,8 +101,9 @@ class img_procs:
         # Define our regions of interest
         # Black line ROI
         ROI = frame [ROI_Y:(ROI_Y+40), 0:320]
+
         # Greenbox ROIs
-        ROIg = frame [ROIg_Y:CAMERA_HEIGHT-30, 0:320]
+        ROIg = frame [ROIg_Y:CAMERA_HEIGHT, 0:320]
 
         # Aluminium ROI
         ROIa = frame [0:ROIa_Y, 0:320]

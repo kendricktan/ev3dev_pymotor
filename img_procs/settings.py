@@ -10,9 +10,9 @@ CAMERA_AWB_MODE = 'off' # Autowhite balance
 CAMERA_AWB_GAINS = (Fraction(101, 64), Fraction(323, 256))
 
 # PID
-KP = 0.0055
+KP = 0.006
 KI = 0.002
-KD = 0.0035
+KD = 0.0036
 DERIVATOR = 0
 
 P_VAL = 0
@@ -36,15 +36,14 @@ ROI_Y = 120
 
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
-THRESH = 125 # Change threshold to higher if can't detect line; Change to lower if detects too many
+THRESH = 122 # Change threshold to higher if can't detect line; Change to lower if detects too many
 AREA_THRESH = 850 # Minimum area before it's considered to be a black line
 
 # Green filter thresholding
-ROIg_Y = CAMERA_HEIGHT-90
+ROIg_Y = CAMERA_HEIGHT-60
 
 GREEN_P_VAL = 0.83 # PID for green val
-GREEN_RANGE = [([45, 90, 170], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it
-GREEN_RANGE_2 = [([0, 0, 0], [0, 0, 0])]
+GREEN_RANGE = [([45, 70, 170], [85, 150, 215])] # HSV, use get_hsv.py to calibrate it
 GREEN_AREA_THRESH = 200 # Area of contour before officially recognizing it
 GREEN_THRESH = 35 #THRESH # Change to lower if can't detect line; change to higher if detects too many
 
