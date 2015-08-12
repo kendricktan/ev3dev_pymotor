@@ -467,6 +467,9 @@ class img_procs:
         self.stream.truncate()
 
         return 'unknown'
+        
+    def get_is_aluminium_found(self):
+        return self.is_aluminium_found
 
     def get_is_black_line_straight(self):
         return self.is_black_line_straight
