@@ -203,9 +203,6 @@ def translate(raw_str):
                 motors['right'].run_to_rel_pos(125)
                 motors['left'].run_to_rel_pos(125)
                 time.sleep(0.75)
-                motors['right'].run_to_rel_pos(-100)
-                motors['left'].run_to_rel_pos(-100)
-                time.sleep(0.55)
                 motors['right'].run_to_rel_pos(50)
                 time.sleep(0.35)
                 motors['right'].run_to_rel_pos(-50)
@@ -214,6 +211,10 @@ def translate(raw_str):
                 time.sleep(0.35)
                 motors['left'].run_to_rel_pos(-50)
                 time.sleep(0.35)
+                motors['right'].run_to_rel_pos(-35)
+                motors['left'].run_to_rel_pos(-35)
+                time.sleep(0.75)
+
 
                 # Lower crane
                 motors['crane'].run_to_rel_pos(-1250)
