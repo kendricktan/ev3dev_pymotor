@@ -24,8 +24,8 @@ can_relative_position = 'left'
 
 # Is the can in the extended chemical spill zone
 extended_zone = True
-extended_zone_location = 'left' # Where is extended zone
-
+extended_zone_location = 'right' # Where is extended zone
+extended_zone_time_wait = 2 # 2 if can is near robot, 1.5 if can is mid range from robot, 1.1 if can is v far away from robot
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
 
@@ -55,14 +55,14 @@ if not extended_zone:
 elif extended_zone:
     # Turn 90 degrees based on where can is
     if 'left' in extended_zone_location:
-        client.send('right run_to_rel_pos(240)')
+        client.send('right run_to_rel_pos(230)')
         time.sleep(0.125)
-        client.send('left run_to_rel_pos(-240)')
+        client.send('left run_to_rel_pos(-230)')
 
     elif 'right' in extended_zone_location:
-        client.send('left run_to_rel_pos(-240)')
+        client.send('right run_to_rel_pos(-230)')
         time.sleep(0.125)
-        client.send('right run_to_rel_pos(240)')
+        client.send('left run_to_rel_pos(230)')
 
     time.sleep(2)
 
@@ -154,7 +154,7 @@ time.sleep(2.5)
 
 # Turn clockwise until it finds the platform
 # based on timing :\
-extended_zone_turn_time = 2*(end_turn_time-start_turn_time)# no idea why its 2*
+extended_zone_turn_time = extended_zone_time_wait*(end_turn_time-start_turn_time)# no idea why its 2*
 rotate_time = 5-(end_turn_time-start_turn_time)
 
 start_turn_time = time.time()
@@ -183,14 +183,14 @@ if extended_zone:
 
     # rerotates itself so it faces platform
     if 'left' in extended_zone_location:
-        client.send('left run_to_rel_pos(240)')
+        client.send('left run_to_rel_pos(230)')
         time.sleep(0.125)
-        client.send('right run_to_rel_pos(-240)')
+        client.send('right run_to_rel_pos(-230)')
 
     elif 'right' in extended_zone_location:
-        client.send('right run_to_rel_pos(240)')
+        client.send('right run_to_rel_pos(230)')
         time.sleep(0.125)
-        client.send('left run_to_rel_pos(-240)')
+        client.send('left run_to_rel_pos(-230)')
 
     time.sleep(1.5)
 
@@ -200,6 +200,9 @@ client.send('change_rps(0.35)')
 
 # 4 seconds should be enough
 time.sleep(4)
+
+if extended_zone:
+    time.sleep(3)
 
 client.send('stop')
 
