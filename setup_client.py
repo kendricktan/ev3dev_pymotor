@@ -78,6 +78,13 @@ while True:
                 # Just for safety
                 time.sleep(1.0)
 
+                # Allow it time to slowly follow blackline
+                us_avoid_end = time.time()
+                while time.time()-us_avoid_end <= 2.5:
+                    pi_img_procs.update()
+                    client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
+                    client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
+
     # Does it detect a greenbox
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location

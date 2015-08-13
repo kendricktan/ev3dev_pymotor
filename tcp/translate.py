@@ -256,10 +256,8 @@ def translate(raw_str):
             try:
                 # Needa set speed to 0.75 rps as
                 # it was tested under those conditions
-                # Reverses back so it doesn't hit it
                 for motor in motors:
                     motors[motor].set_rps(0.75)
-                    motors[motor].run_to_rel_pos(-125)
 
                 time.sleep(0.3)
 
