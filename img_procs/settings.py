@@ -10,16 +10,16 @@ CAMERA_AWB_MODE = 'off' # Autowhite balance
 CAMERA_AWB_GAINS = (Fraction(101, 64), Fraction(323, 256))
 
 # PID
-KP = 0.006
-KI = 0.002
-KD = 0.0036
+KP = 0.00625
+KI = 0.00245
+KD = 0.005
 DERIVATOR = 0
 
 P_VAL = 0
 I_VAL = 0
 D_VAL = 0
 
-I_MAX = 0.0137
+I_MAX = 0.0157
 I_MIN = -I_MAX
 
 PID_TOTAL = 0
@@ -28,11 +28,11 @@ ERROR = 0
 
 # Motor speed
 MOTOR_RPS = 0.65 # rotations per second
-MOTOR_RPS_MIN = -MOTOR_RPS
+MOTOR_RPS_MIN = -1.33
 # If line is on the right = negative value
 
 # ROI Settings
-ROI_Y = 120
+ROI_Y = 190
 BLACK_RANGE = [([25, 30, 20], [80, 115, 125])]
 # Black line thresholding
 MIDDLE = CAMERA_WIDTH/2
