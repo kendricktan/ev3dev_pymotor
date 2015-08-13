@@ -232,7 +232,7 @@ def translate(raw_str):
                 time.sleep(0.35)
 
                 # Continue lowering crane
-                motors['crane'].run_to_rel_pos(-700)
+                motors['crane'].run_to_rel_pos(-800)
 
                 # Nudges can one final time
                 motors['right'].run_to_rel_pos(50)

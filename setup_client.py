@@ -213,7 +213,7 @@ while True:
         time.sleep(0.5)
 
         # Pulls can up
-        client.send('crane run_to_rel_pos(1750)')
+        client.send('crane run_to_rel_pos(1850)')
         time.sleep(8)
 
         # Reverses the robot
