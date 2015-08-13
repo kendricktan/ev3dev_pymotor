@@ -10,8 +10,8 @@ CAMERA_AWB_MODE = 'off' # Autowhite balance
 CAMERA_AWB_GAINS = (Fraction(101, 64), Fraction(323, 256))
 
 # PID
-KP = 0.00625
-KI = 0.00245
+KP = 0.0061
+KI = 0.0027
 KD = 0.005
 DERIVATOR = 0
 
@@ -19,7 +19,7 @@ P_VAL = 0
 I_VAL = 0
 D_VAL = 0
 
-I_MAX = 0.0157
+I_MAX = 0.04
 I_MIN = -I_MAX
 
 PID_TOTAL = 0
