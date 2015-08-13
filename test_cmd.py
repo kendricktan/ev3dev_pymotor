@@ -64,17 +64,24 @@ elif extended_zone:
         time.sleep(0.125)
         client.send('right run_to_rel_pos(240)')
 
-    time.sleep(1.5)
+    time.sleep(2)
 
     # Run to center of tile
     client.send('run_to_rel_pos(1200)')
     time.sleep(6.5)
 
 # Begin turning anti-clockwise/clockwise slowly based on can's position
-if 'left' in can_relative_position:
-    client.send('clockwise_slow')
-elif 'right' in can_relative_position:
-    client.send('clockwise_anti_slow')
+if not extended_zone:
+    if 'left' in can_relative_position:
+        client.send('clockwise_slow')
+    elif 'right' in can_relative_position:
+        client.send('clockwise_anti_slow')
+
+elif extended_zone:
+    if 'left' in can_relative_position:
+        client.send('clockwise_anti_slow')
+    elif 'right' in can_relative_position:
+        client.send('clockwise_slow')
 
 time.sleep(0.6)
 
@@ -147,6 +154,7 @@ time.sleep(2.5)
 
 # Turn clockwise until it finds the platform
 # based on timing :\
+extended_zone_turn_time = 2*(end_turn_time-start_turn_time)# no idea why its 2*
 rotate_time = 5-(end_turn_time-start_turn_time)
 
 start_turn_time = time.time()
@@ -156,13 +164,20 @@ if 'left' in can_relative_position:
 elif 'right' in can_relative_position:
     client.send('clockwise_anti_slow')
 
-while time.time()-start_turn_time <= rotate_time:
-    pass
+if not extended_zone:
+    while time.time()-start_turn_time <= rotate_time:
+        pass
+
+elif extended_zone:
+    while time.time()-start_turn_time <= extended_zone_turn_time:
+        pass
 
 client.send('stop')
 
 # If its in an extended zone it needs to go back from where it can from
 if extended_zone:
+    client.send('set_rps(0.75)')
+    time.sleep(1.5)
     client.send('run_to_rel_pos(-1200)')
     time.sleep(6.5)
 
