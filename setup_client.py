@@ -87,26 +87,33 @@ while True:
 
     # Does it detect aluminium foil (endzone)
     if pi_img_procs.get_is_aluminium_found():
+        client.send('run_to_rel_pos(-100)')
+
         # Repositions itself so its straight
         alum_detect_time = time.time()
-        while time.time()-alum_detect_time < 2:
+        while time.time()-alum_detect_time <= 2:
             pi_img_procs.update()
             # Motor values are inverted as we're travelling backwards
             client.send('right change_rps(-'+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
             client.send('left change_rps(-'+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
+
         time.sleep(0.25)
         client.send('stop')
+
         # Recalibrates servo
         servo.degrees_0()
         time.sleep(0.25)
+
         # Set initial rps
         client.send('set_rps(0.65)')
         client.send('run_forever')
+
         # Goes straight until it's within 15cm of the platform
         while us_sens01.get_lowest_reading() >= 15:
             pass
         client.send('stop')
         time.sleep(0.25)
+
         # If can is not in extended zone
         if not EXTENDED_ZONE:
             # Turn 180 degrees
@@ -281,10 +288,11 @@ while True:
 
         # Drops can
         servo.degrees_0()
-
+        client.send('crane run_to_rel_pos(100)')
         time.sleep(2)
 
         client.send('change_rps(-0.75)')
+        client.send('crane run_to_rel_pos(-100)')
 
         # Yay finished the course!
         break
