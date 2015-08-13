@@ -89,36 +89,29 @@ while True:
     if pi_img_procs.get_is_aluminium_found():
         # Repositions itself so its straight
         alum_detect_time = time.time()
-
         while time.time()-alum_detect_time < 2:
             pi_img_procs.update()
             # Motor values are inverted as we're travelling backwards
             client.send('right change_rps(-'+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
             client.send('left change_rps(-'+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
-
-
+        time.sleep(0.25)
         client.send('stop')
         # Recalibrates servo
         servo.degrees_0()
         time.sleep(0.25)
-
         # Set initial rps
         client.send('set_rps(0.65)')
         client.send('run_forever')
-
         # Goes straight until it's within 15cm of the platform
         while us_sens01.get_lowest_reading() >= 15:
             pass
-
         client.send('stop')
         time.sleep(0.25)
-
         # If can is not in extended zone
         if not EXTENDED_ZONE:
             # Turn 180 degrees
             client.send('degrees_180')
             time.sleep(3.5)
-
         # if can is in extended zone
         elif EXTENDED_ZONE:
             # Turn 90 degrees based on where can is
