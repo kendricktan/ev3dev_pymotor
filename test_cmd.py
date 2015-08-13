@@ -20,10 +20,10 @@ print 'Successfully connected to ' + TCP_IP +  '...'
 
 # Where is muh can
 # If extended zone is true, then this position will be based on where robot enters tile
-can_relative_position = 'right'
+can_relative_position = 'left'
 
 # Is the can in the extended chemical spill zone
-extended_zone = True
+extended_zone = False
 extended_zone_location = 'right' # Where is extended zone
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
@@ -161,7 +161,8 @@ else:
     extended_zone_time_wait = 1.25
 
 extended_zone_turn_time = extended_zone_time_wait*(end_turn_time-start_turn_time)# no idea why its 2*
-rotate_time = 5-(end_turn_time-start_turn_time)
+
+rotate_time = 5.15-(end_turn_time-start_turn_time)
 
 if 'left' in can_relative_position:
     client.send('clockwise_slow')
