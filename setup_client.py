@@ -85,51 +85,6 @@ while True:
                     client.send('right change_rps('+str(pi_img_procs.get_rmotor_value()/3)+')')
                     client.send('left change_rps('+str(pi_img_procs.get_lmotor_value()/3)+')')
 
-    # Does it detect a greenbox
-    if pi_img_procs.get_is_greenbox():
-        # Gets greenbox location
-        greenbox_location = pi_img_procs.get_greenbox_location()
-
-        while 'unknown' in greenbox_location:
-            greenbox_location=pi_img_procs.get_greenbox_location()
-
-        # Goes slowly along blackline until passes the greenbox
-        while pi_img_procs.get_is_greenbox():
-            pi_img_procs.update()
-            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
-            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
-
-        time.sleep(0.5)
-        # Starts over the blackline (if any)
-        # Sleep helps provide consistent packet sending
-        client.send('nudge_forward')
-        time.sleep(1.5)
-
-        # Sends robot in direction of the greenbox
-        if 'left' in greenbox_location:
-            client.send('clockwise_anti_slow')
-
-        elif 'right' in greenbox_location:
-            client.send('clockwise_slow')
-
-        time.sleep(2.15)
-
-        # This is merely a pattern formed in robocup 2015
-        # that we're taking advantage of
-        while pi_img_procs.get_is_black_line_straight():
-            pi_img_procs.update()
-
-        while not pi_img_procs.get_is_black_line_straight():
-            pi_img_procs.update()
-
-        green_time = time.time()
-
-        # Follow blackline if we immediately see a greenbox
-        while pi_img_procs.get_is_greenbox() or time.time() - green_time < 0.5:
-            pi_img_procs.update()
-            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*   100)/100)+')')
-            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*    100)/100)+')')
-
     # Does it detect aluminium foil (endzone)
     if pi_img_procs.get_is_aluminium_found():
         # Repositions itself so its straight
@@ -149,7 +104,6 @@ while True:
 
         # Set initial rps
         client.send('set_rps(0.65)')
-        time.sleep(0.5)
         client.send('run_forever')
 
         # Goes straight until it's within 15cm of the platform
@@ -159,15 +113,44 @@ while True:
         client.send('stop')
         time.sleep(0.25)
 
-        # Turn 180 degrees
-        client.send('degrees_180')
-        time.sleep(3)
+        # If can is not in extended zone
+        if not EXTENDED_ZONE:
+            # Turn 180 degrees
+            client.send('degrees_180')
+            time.sleep(3.5)
+
+        # if can is in extended zone
+        elif EXTENDED_ZONE:
+            # Turn 90 degrees based on where can is
+            if 'left' in EXTENDED_ZONE_LOCATION:
+                client.send('right run_to_rel_pos(230)')
+                time.sleep(0.125)
+                client.send('left run_to_rel_pos(-230)')
+
+            elif 'right' in EXTENDED_ZONE_LOCATION:
+                client.send('right run_to_rel_pos(-230)')
+                time.sleep(0.125)
+                client.send('left run_to_rel_pos(230)')
+
+            time.sleep(2)
+
+            # Run to center of tile
+            client.send('run_to_rel_pos(1200)')
+            time.sleep(6.5)
 
         # Begin turning anti-clockwise/clockwise slowly based on can's position
-        if 'left' in CAN_RELATIVE_POSITION:
-            client.send('clockwise_slow')
-        elif 'right' in CAN_RELATIVE_POSITION:
-            client.send('clockwise_anti_slow')
+        if not EXTENDED_ZONE:
+            if 'left' in 
+            CAN_RELATIVE_POSITION:
+                client.send('clockwise_slow')
+            elif 'right' in CAN_RELATIVE_POSITION:
+                client.send('clockwise_anti_slow')
+
+        elif extended_zone:
+            if 'left' in CAN_RELATIVE_POSITION:
+                client.send('clockwise_anti_slow')
+            elif 'right' in CAN_RELATIVE_POSITION:
+                client.send('clockwise_slow')
 
         time.sleep(0.6)
 
@@ -218,7 +201,7 @@ while True:
                 client.send('stop')
                 break
 
-        # Proceeding steps to drop can at platform
+        # Proceeding steps to grab can
         client.send('stop')
         time.sleep(0.1)
 
@@ -230,7 +213,7 @@ while True:
         servo.degrees_180()
         time.sleep(0.5)
 
-        # Pull cna up
+        # Pulls can up
         client.send('crane run_to_rel_pos(1750)')
         time.sleep(8)
 
@@ -240,25 +223,63 @@ while True:
 
         # Turn clockwise until it finds the platform
         # based on timing :\
-        rotate_time = 5-(end_turn_time-start_turn_time)
+        if end_turn_time-start_turn_time < 1:
+            extended_zone_time_wait = 2
+        elif end_turn_time-start_turn_time < 2:
+            extended_zone_time_wait = 1.5
+        else:
+            extended_zone_time_wait = 1.25
 
-        start_turn_time = time.time()
+        extended_zone_turn_time = extended_zone_time_wait*(end_turn_time-start_turn_time)# no idea why its 2*
+
+        rotate_time = 5.15-(end_turn_time-start_turn_time)
 
         if 'left' in CAN_RELATIVE_POSITION:
             client.send('clockwise_slow')
         elif 'right' in CAN_RELATIVE_POSITION:
             client.send('clockwise_anti_slow')
 
-        while time.time()-start_turn_time <= rotate_time:
-            pass
+        start_turn_time = time.time()
+
+        if not EXTENDED_ZONE:
+            while time.time()-start_turn_time <= rotate_time:
+                pass
+
+        elif EXTENDED_ZONE:
+            while time.time()-start_turn_time <= extended_zone_turn_time:
+                pass
 
         client.send('stop')
+
+        # If its in an extended zone it needs to go back from where it can from
+        if EXTENDED_ZONE:
+            client.send('set_rps(0.75)')
+            time.sleep(1.5)
+            client.send('run_to_rel_pos(-1200)')
+            time.sleep(6.5)
+
+            # rerotates itself so it faces platform
+            if 'left' in EXTENDED_ZONE_LOCATION:
+                client.send('left run_to_rel_pos(230)')
+                time.sleep(0.125)
+                client.send('right run_to_rel_pos(-230)')
+
+            elif 'right' in EXTENDED_ZONE_LOCATION:
+                client.send('right run_to_rel_pos(230)')
+                time.sleep(0.125)
+                client.send('left run_to_rel_pos(-230)')
+
+            time.sleep(1.5)
+
 
         # Go forward until reaches platform
         client.send('change_rps(0.35)')
 
         # 4 seconds should be enough
         time.sleep(4)
+
+        if EXTENDED_ZONE:
+            time.sleep(3)
 
         client.send('stop')
 
@@ -268,12 +289,58 @@ while True:
 
         # Drops can
         servo.degrees_0()
+
         time.sleep(2)
 
         client.send('change_rps(-0.75)')
 
         # Yay finished the course!
         break
+        
+    # Does it detect a greenbox
+    if pi_img_procs.get_is_greenbox():
+        # Gets greenbox location
+        greenbox_location = pi_img_procs.get_greenbox_location()
+
+        while 'unknown' in greenbox_location:
+            greenbox_location=pi_img_procs.get_greenbox_location()
+
+        # Goes slowly along blackline until passes the greenbox
+        while pi_img_procs.get_is_greenbox():
+            pi_img_procs.update()
+            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*100)/100)+')')
+            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*100)/100)+')')
+
+        time.sleep(0.5)
+        # Starts over the blackline (if any)
+        # Sleep helps provide consistent packet sending
+        client.send('nudge_forward')
+        time.sleep(1.5)
+
+        # Sends robot in direction of the greenbox
+        if 'left' in greenbox_location:
+            client.send('clockwise_anti_slow')
+
+        elif 'right' in greenbox_location:
+            client.send('clockwise_slow')
+
+        time.sleep(2.15)
+
+        # This is merely a pattern formed in robocup 2015
+        # that we're taking advantage of
+        while pi_img_procs.get_is_black_line_straight():
+            pi_img_procs.update()
+
+        while not pi_img_procs.get_is_black_line_straight():
+            pi_img_procs.update()
+
+        green_time = time.time()
+
+        # Follow blackline if we immediately see a greenbox
+        while pi_img_procs.get_is_greenbox() or time.time() - green_time < 0.5:
+            pi_img_procs.update()
+            client.send('right change_rps('+str(math.ceil(pi_img_procs.get_rmotor_value()/3*   100)/100)+')')
+            client.send('left change_rps('+str(math.ceil(pi_img_procs.get_lmotor_value()/3*    100)/100)+')')
 
     # Updates camera feed
     pi_img_procs.update()

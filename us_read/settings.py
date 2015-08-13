@@ -9,3 +9,7 @@ US_START_DIST = 20 # in cm
 
 # Where is muh can relative to me
 CAN_RELATIVE_POSITION = 'left'
+
+# Is the can in the extended chemical spill zone
+EXTENDED_ZONE = False
+EXTENDED_ZONE_LOCATION = 'right' # Where is extended zone
