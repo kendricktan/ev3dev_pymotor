@@ -217,8 +217,8 @@ def translate(raw_str):
 
 
                 # Lower crane
-                motors['crane'].run_to_rel_pos(-1150)
-                time.sleep(5.5)
+                motors['crane'].run_to_rel_pos(-1050)
+                time.sleep(5)
 
                 # 'Nudges' crane around in case it didn't land on can
                 motors['right'].run_to_rel_pos(50)
@@ -232,7 +232,7 @@ def translate(raw_str):
                 time.sleep(0.35)
 
                 # Continue lowering crane
-                motors['crane'].run_to_rel_pos(-600)
+                motors['crane'].run_to_rel_pos(-700)
 
                 # Nudges can one final time
                 motors['right'].run_to_rel_pos(50)
