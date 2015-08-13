@@ -19,8 +19,12 @@ client = client_tcp(TCP_IP)
 print 'Successfully connected to ' + TCP_IP +  '...'
 
 # Where is muh can
+# If extended zone is true, then this position will be based on where robot enters tile
 can_relative_position = 'left'
 
+# Is the can in the extended chemical spill zone
+extended_zone = True
+extended_zone_location = 'left' # Where is extended zone
 
 # Initialize Ultrasonic sensor class
 us_sens01 = us_read(14, 15)
@@ -41,9 +45,30 @@ while us_sens01.get_lowest_reading() >= 15:
 client.send('stop')
 time.sleep(0.25)
 
-# Turn 180 degrees
-client.send('degrees_180')
-time.sleep(3.5)
+# If can is not in extended zone
+if not extended_zone:
+    # Turn 180 degrees
+    client.send('degrees_180')
+    time.sleep(3.5)
+
+# if can is in extended zone
+elif extended_zone:
+    # Turn 90 degrees based on where can is
+    if 'left' in extended_zone_location:
+        client.send('right run_to_rel_pos(240)')
+        time.sleep(0.125)
+        client.send('left run_to_rel_pos(-240)')
+
+    elif 'right' in extended_zone_location:
+        client.send('left run_to_rel_pos(-240)')
+        time.sleep(0.125)
+        client.send('right run_to_rel_pos(240)')
+
+    time.sleep(1.5)
+
+    # Run to center of tile
+    client.send('run_to_rel_pos(1200)')
+    time.sleep(6.5)
 
 # Begin turning anti-clockwise/clockwise slowly based on can's position
 if 'left' in can_relative_position:
@@ -100,7 +125,7 @@ while True:
         client.send('stop')
         break
 
-# Proceeding steps to drop can at platform
+# Proceeding steps to grab can
 client.send('stop')
 time.sleep(0.1)
 
@@ -112,7 +137,7 @@ time.sleep(12.5)
 servo.degrees_180()
 time.sleep(0.5)
 
-# Pull cna up
+# Pulls can up
 client.send('crane run_to_rel_pos(1750)')
 time.sleep(8)
 
@@ -135,6 +160,25 @@ while time.time()-start_turn_time <= rotate_time:
     pass
 
 client.send('stop')
+
+# If its in an extended zone it needs to go back from where it can from
+if extended_zone:
+    client.send('run_to_rel_pos(-1200)')
+    time.sleep(6.5)
+
+    # rerotates itself so it faces platform
+    if 'left' in extended_zone_location:
+        client.send('left run_to_rel_pos(240)')
+        time.sleep(0.125)
+        client.send('right run_to_rel_pos(-240)')
+
+    elif 'right' in extended_zone_location:
+        client.send('right run_to_rel_pos(240)')
+        time.sleep(0.125)
+        client.send('left run_to_rel_pos(-240)')
+
+    time.sleep(1.5)
+
 
 # Go forward until reaches platform
 client.send('change_rps(0.35)')
