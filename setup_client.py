@@ -140,13 +140,12 @@ while True:
 
         # Begin turning anti-clockwise/clockwise slowly based on can's position
         if not EXTENDED_ZONE:
-            if 'left' in 
-            CAN_RELATIVE_POSITION:
+            if 'left' in CAN_RELATIVE_POSITION:
                 client.send('clockwise_slow')
             elif 'right' in CAN_RELATIVE_POSITION:
                 client.send('clockwise_anti_slow')
 
-        elif extended_zone:
+        elif EXTENDED_ZONE:
             if 'left' in CAN_RELATIVE_POSITION:
                 client.send('clockwise_anti_slow')
             elif 'right' in CAN_RELATIVE_POSITION:
@@ -296,7 +295,7 @@ while True:
 
         # Yay finished the course!
         break
-        
+
     # Does it detect a greenbox
     if pi_img_procs.get_is_greenbox():
         # Gets greenbox location
